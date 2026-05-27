@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { HeaderPreferences } from './HeaderPreferences.js';
 
 export function AppLayout({
-  title,
   toolbar,
   sidebar,
   children,
@@ -10,7 +11,6 @@ export function AppLayout({
   onOpenSettings,
   headerActions,
 }: {
-  title: string;
   toolbar: ReactNode;
   sidebar: ReactNode;
   children: ReactNode;
@@ -19,29 +19,30 @@ export function AppLayout({
   onOpenSettings: () => void;
   headerActions?: ReactNode;
 }) {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex h-screen flex-col bg-zinc-950 text-zinc-100">
-      <header className="flex shrink-0 items-center gap-4 border-b border-zinc-800 px-4 py-3">
+    <div className="csm-shell">
+      <header className="csm-header">
         <div className="shrink-0">
-          <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
-          <p className="text-xs text-zinc-500">Cursor Skills Manager</p>
+          <h1 className="text-lg font-semibold tracking-tight">{t('app.title')}</h1>
+          <p className="csm-muted text-xs">{t('app.subtitle')}</p>
         </div>
         {toolbar}
+        <HeaderPreferences />
         {headerActions}
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800"
-        >
-          设置
+        <button type="button" onClick={onOpenSettings} className="csm-btn shrink-0">
+          {t('nav.settings')}
         </button>
       </header>
       <div className="flex min-h-0 flex-1">
-        <aside className="w-56 shrink-0 overflow-y-auto border-r border-zinc-800 p-3">
-          {sidebar}
-        </aside>
+        <aside className="csm-aside">{sidebar}</aside>
         <main className="flex min-w-0 flex-1 flex-col">{children}</main>
-        {detail && <aside className="w-80 shrink-0 overflow-y-auto">{detail}</aside>}
+        {detail && (
+          <aside className="w-80 shrink-0 overflow-y-auto border-l border-zinc-200 dark:border-zinc-800">
+            {detail}
+          </aside>
+        )}
         {gitPanel}
       </div>
     </div>

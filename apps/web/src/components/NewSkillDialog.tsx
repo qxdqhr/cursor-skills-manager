@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ApiClientError, postSkill } from '../lib/api.js';
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export function NewSkillDialog({ open, onClose, onCreated }: Props) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [categoryPath, setCategoryPath] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function NewSkillDialog({ open, onClose, onCreated }: Props) {
           ? err.message
           : err instanceof Error
             ? err.message
-            : '创建失败';
+            : t('newSkill.createFailed');
       setError(msg);
     } finally {
       setSaving(false);
@@ -44,49 +46,38 @@ export function NewSkillDialog({ open, onClose, onCreated }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-xl"
-      >
-        <h2 className="text-lg font-medium text-zinc-100">新建 Skill</h2>
-        <p className="mt-1 text-xs text-zinc-500">将在个人主库创建目录与 SKILL.md</p>
+      <form onSubmit={handleSubmit} className="csm-panel w-full max-w-md p-6 shadow-xl">
+        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">{t('newSkill.title')}</h2>
+        <p className="csm-muted mt-1 text-xs">{t('newSkill.hint')}</p>
         <div className="mt-4 space-y-3">
           <div>
-            <label className="text-xs text-zinc-500">name（目录名）</label>
+            <label className="csm-muted text-xs">{t('newSkill.name')}</label>
             <input
               required
               pattern="[a-z0-9-]+"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="my-new-skill"
-              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-sm"
+              className="csm-input mt-1 w-full rounded-lg px-3 py-2 font-mono text-sm"
             />
           </div>
           <div>
-            <label className="text-xs text-zinc-500">categoryPath（可选）</label>
+            <label className="csm-muted text-xs">{t('newSkill.category')}</label>
             <input
               value={categoryPath}
               onChange={(e) => setCategoryPath(e.target.value)}
               placeholder="experiments"
-              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-sm"
+              className="csm-input mt-1 w-full rounded-lg px-3 py-2 font-mono text-sm"
             />
           </div>
         </div>
-        {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+        {error && <p className="mt-3 text-sm text-red-500 dark:text-red-400">{error}</p>}
         <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200"
-          >
-            取消
+          <button type="button" onClick={onClose} className="csm-muted text-sm hover:text-zinc-800 dark:hover:text-zinc-200">
+            {t('newSkill.cancel')}
           </button>
-          <button
-            type="submit"
-            disabled={saving || !name.trim()}
-            className="rounded-lg bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600 disabled:opacity-50"
-          >
-            {saving ? '创建中…' : '创建'}
+          <button type="submit" disabled={saving || !name.trim()} className="csm-btn-primary disabled:opacity-50">
+            {saving ? t('newSkill.creating') : t('newSkill.create')}
           </button>
         </div>
       </form>

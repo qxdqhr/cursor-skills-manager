@@ -75,6 +75,16 @@ export async function fetchConfig(): Promise<PublicConfig> {
   return request<PublicConfig>('/config');
 }
 
+export async function patchConfig(patch: {
+  locale?: 'zh' | 'en';
+  theme?: 'light' | 'dark' | 'system';
+}): Promise<PublicConfig> {
+  return request<PublicConfig>('/config', {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  });
+}
+
 export async function fetchSkills(params: {
   q?: string;
   source?: string;

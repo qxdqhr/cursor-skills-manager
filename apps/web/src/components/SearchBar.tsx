@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 export type SourceFilter = 'all' | 'personal' | 'project';
 
 export function SearchBar({
@@ -15,33 +17,35 @@ export function SearchBar({
   gitDirtyOnly: boolean;
   onGitDirtyOnlyChange: (v: boolean) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-1 flex-wrap items-center gap-2">
       <input
         type="search"
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
-        placeholder="搜索 name / description / 正文…"
-        className="min-w-[200px] flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+        placeholder={t('search.placeholder')}
+        className="csm-input min-w-[200px] flex-1 rounded-lg px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
       />
       <select
         value={source}
         onChange={(e) => onSourceChange(e.target.value as SourceFilter)}
-        className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200"
-        aria-label="来源筛选"
+        className="csm-input rounded-lg px-3 py-2 text-sm"
+        aria-label={t('search.sourceAll')}
       >
-        <option value="all">全部来源</option>
-        <option value="personal">个人主库</option>
-        <option value="project">项目只读</option>
+        <option value="all">{t('search.sourceAll')}</option>
+        <option value="personal">{t('search.sourcePersonal')}</option>
+        <option value="project">{t('search.sourceProject')}</option>
       </select>
-      <label className="flex items-center gap-1.5 text-sm text-zinc-400">
+      <label className="csm-muted flex items-center gap-1.5 text-sm">
         <input
           type="checkbox"
           checked={gitDirtyOnly}
           onChange={(e) => onGitDirtyOnlyChange(e.target.checked)}
-          className="rounded border-zinc-600"
+          className="rounded border-zinc-400 dark:border-zinc-600"
         />
-        仅未提交
+        {t('search.gitDirtyOnly')}
       </label>
     </div>
   );

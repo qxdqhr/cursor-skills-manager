@@ -1,0 +1,152 @@
+{
+  "app": {
+    "title": "Skills",
+    "subtitle": "Cursor Skills Manager"
+  },
+  "nav": {
+    "settings": "Settings",
+    "backList": "← Back to list",
+    "back": "← Back",
+    "refresh": "Refresh",
+    "new": "New",
+    "syncAgents": "Sync agents",
+    "git": "Git",
+    "close": "Close"
+  },
+  "locale": {
+    "zh": "中文",
+    "en": "English"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "search": {
+    "placeholder": "Search name, description, body…",
+    "sourceAll": "All sources",
+    "sourcePersonal": "Personal library",
+    "sourceProject": "Project (read-only)",
+    "gitDirtyOnly": "Uncommitted only"
+  },
+  "skills": {
+    "loading": "Loading…",
+    "empty": "No matching skills",
+    "emptyHint": "Try different search or filters",
+    "count": "{{filtered}} / {{total}} items",
+    "selectHint": "Select a skill to view details",
+    "personal": "Personal",
+    "project": "Project",
+    "readOnly": "Read-only",
+    "validationFailed": "Invalid",
+    "scripts": "scripts",
+    "uncommitted": "Uncommitted",
+    "agentsUnlinked": "agents unlinked",
+    "openEditor": "Open editor",
+    "openFolder": "Open folder",
+    "openInEditor": "Open in editor",
+    "projectReadOnlyHint": "Project skills are read-only and cannot be saved here.",
+    "description": "Description",
+    "path": "Path",
+    "category": "Category"
+  },
+  "settings": {
+    "title": "Settings",
+    "apiToken": "API Token",
+    "tokenHint": "Copy api.token from ~/.cursor/skills/.csm/config.json and paste below.",
+    "saveToken": "Save token",
+    "clear": "Clear",
+    "invalidToken": "Invalid token, please try again",
+    "configReadonly": "Current config (read-only)",
+    "personalRoot": "Personal root",
+    "agents": "Agents",
+    "scanGlobs": "Project scan globs",
+    "apiPort": "API port",
+    "serverToken": "Server token",
+    "tokenConfigured": "Configured",
+    "tokenMissing": "Not configured",
+    "locale": "Language",
+    "theme": "Theme",
+    "savePrefs": "Save preferences",
+    "prefsSaved": "Preferences saved",
+    "firstUseToken": "Configure your API token to get started",
+    "openSettings": "Open settings"
+  },
+  "api": {
+    "connecting": "Connecting to API…",
+    "unreachable": "Cannot reach API (:3847)",
+    "startHint": "Run pnpm dev:api first"
+  },
+  "editor": {
+    "loading": "Loading editor…",
+    "loadFailed": "Failed to load skill",
+    "readOnly": "Read-only",
+    "tabEdit": "Edit",
+    "tabFiles": "Files",
+    "preview": "Preview",
+    "unsaved": "Unsaved changes",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "deleteConfirm": "Delete skill \"{{name}}\"? This cannot be undone (hard delete).",
+    "fixValidation": "Fix validation errors first",
+    "saved": "Saved",
+    "saveFailed": "Save failed",
+    "deleteFailed": "Delete failed"
+  },
+  "newSkill": {
+    "title": "New skill",
+    "hint": "Creates a directory and SKILL.md in your personal library",
+    "name": "name (directory name)",
+    "category": "categoryPath (optional)",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating…",
+    "createFailed": "Create failed"
+  },
+  "git": {
+    "title": "Git",
+    "clean": "clean",
+    "changes": "{{count}} change(s)",
+    "tabChanges": "Changes",
+    "tabLog": "History",
+    "workspaceClean": "Working tree clean",
+    "selectDiff": "Select a file to view diff",
+    "loadingDiff": "Loading diff…",
+    "noDiff": "(no diff)",
+    "diffFailed": "Failed to load diff",
+    "commitPlaceholder": "feat(skills): …",
+    "commitSelected": "Commit selected",
+    "commitAll": "Commit all",
+    "commitMessageRequired": "Enter a commit message",
+    "commitFailed": "Commit failed",
+    "statusFailed": "Failed to load Git status",
+    "noLog": "No commits yet"
+  },
+  "sync": {
+    "title": "Sync agents",
+    "scriptHint": "Runs scripts/sync-from-agents-skills.sh",
+    "running": "Running…",
+    "noOutput": "(no output yet)",
+    "exitCode": "Script exited with code {{code}}",
+    "failed": "Sync failed",
+    "start": "Run sync",
+    "cancel": "Cancel"
+  },
+  "files": {
+    "loading": "Loading files…",
+    "empty": "No extra files (SKILL.md only)",
+    "dir": "directory",
+    "file": "file"
+  },
+  "tree": {
+    "all": "All",
+    "loading": "Loading categories…",
+    "personal": "Personal library",
+    "personalAll": "All personal",
+    "projectAll": "All in workspace"
+  },
+  "common": {
+    "loadFailed": "Load failed"
+  }
+}

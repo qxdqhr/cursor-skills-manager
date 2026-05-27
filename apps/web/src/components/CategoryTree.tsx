@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { SkillTreeNode, SkillsTree } from '../types.js';
 
 export type TreeSelection =
@@ -17,7 +18,7 @@ function TreeNodes({
   onPick: (path: string) => void;
 }) {
   return (
-    <ul className={depth > 0 ? 'ml-2 border-l border-zinc-800 pl-2' : ''}>
+    <ul className={depth > 0 ? 'csm-border ml-2 border-l pl-2' : ''}>
       {nodes.map((node) => {
         const path = prefix ? `${prefix}/${node.id}` : node.id;
         return (
@@ -25,10 +26,10 @@ function TreeNodes({
             <button
               type="button"
               onClick={() => onPick(path)}
-              className="w-full rounded px-2 py-1 text-left text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+              className="w-full rounded px-2 py-1 text-left text-sm text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             >
-              <span className="text-zinc-300">{node.label}</span>
-              <span className="ml-1 text-xs text-zinc-600">({node.skillCount})</span>
+              <span className="text-zinc-800 dark:text-zinc-300">{node.label}</span>
+              <span className="csm-muted ml-1 text-xs">({node.skillCount})</span>
             </button>
             {node.children.length > 0 && (
               <TreeNodes nodes={node.children} depth={depth + 1} prefix={path} onPick={onPick} />
@@ -49,16 +50,21 @@ export function CategoryTree({
   selection: TreeSelection;
   onSelect: (s: TreeSelection) => void;
 }) {
+  const { t } = useTranslation();
+
   if (!tree) {
-    return <p className="text-sm text-zinc-600">加载分类…</p>;
+    return <p className="csm-muted text-sm">{t('tree.loading')}</p>;
   }
 
-  const personalActive =
-    selection.type === 'personal' ? selection.categoryPath : null;
+  const personalActive = selection.type === 'personal' ? selection.categoryPath : null;
   const projectActive =
     selection.type === 'project'
       ? { ws: selection.workspaceId, path: selection.categoryPath }
       : null;
+
+  const activeCls = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200';
+  const idleCls =
+    'text-zinc-600 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:bg-zinc-800';
 
   return (
     <div className="space-y-4 text-sm">
@@ -66,26 +72,24 @@ export function CategoryTree({
         type="button"
         onClick={() => onSelect({ type: 'all' })}
         className={`w-full rounded px-2 py-1.5 text-left ${
-          selection.type === 'all'
-            ? 'bg-emerald-900/40 text-emerald-200'
-            : 'text-zinc-400 hover:bg-zinc-800'
+          selection.type === 'all' ? activeCls : idleCls
         }`}
       >
-        全部
+        {t('tree.all')}
       </button>
 
       <div>
-        <p className="mb-1 px-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
-          个人主库
+        <p className="csm-muted mb-1 px-2 text-xs font-medium uppercase tracking-wider">
+          {t('tree.personal')}
         </p>
         <button
           type="button"
           onClick={() => onSelect({ type: 'personal', categoryPath: '' })}
           className={`mb-1 w-full rounded px-2 py-1 text-left text-xs ${
-            personalActive === '' ? 'bg-emerald-900/40 text-emerald-200' : 'text-zinc-500 hover:bg-zinc-800'
+            personalActive === '' ? activeCls : idleCls
           }`}
         >
-          全部个人
+          {t('tree.personalAll')}
         </button>
         <TreeNodes
           nodes={tree.personal}
@@ -98,7 +102,7 @@ export function CategoryTree({
       {tree.project.map((ws) => (
         <div key={ws.workspaceId}>
           <p
-            className="mb-1 truncate px-2 text-xs font-medium uppercase tracking-wider text-zinc-500"
+            className="csm-muted mb-1 truncate px-2 text-xs font-medium uppercase tracking-wider"
             title={ws.workspacePath}
           >
             {ws.workspaceId}
@@ -108,11 +112,11 @@ export function CategoryTree({
             onClick={() => onSelect({ type: 'project', workspaceId: ws.workspaceId, categoryPath: '' })}
             className={`mb-1 w-full rounded px-2 py-1 text-left text-xs ${
               projectActive?.ws === ws.workspaceId && projectActive.path === ''
-                ? 'bg-emerald-900/40 text-emerald-200'
-                : 'text-zinc-500 hover:bg-zinc-800'
+                ? activeCls
+                : idleCls
             }`}
           >
-            全部该项目
+            {t('tree.projectAll')}
           </button>
           <TreeNodes
             nodes={ws.categories}

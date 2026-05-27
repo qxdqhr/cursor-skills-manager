@@ -1,0 +1,152 @@
+{
+  "app": {
+    "title": "Skills",
+    "subtitle": "Cursor Skills Manager"
+  },
+  "nav": {
+    "settings": "设置",
+    "backList": "← 返回列表",
+    "back": "← 返回",
+    "refresh": "刷新",
+    "new": "新建",
+    "syncAgents": "同步 agents",
+    "git": "Git",
+    "close": "关闭"
+  },
+  "locale": {
+    "zh": "中文",
+    "en": "English"
+  },
+  "theme": {
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
+  "search": {
+    "placeholder": "搜索 name / description / 正文…",
+    "sourceAll": "全部来源",
+    "sourcePersonal": "个人主库",
+    "sourceProject": "项目只读",
+    "gitDirtyOnly": "仅未提交"
+  },
+  "skills": {
+    "loading": "加载中…",
+    "empty": "没有匹配的 skill",
+    "emptyHint": "尝试调整搜索或筛选条件",
+    "count": "{{filtered}} / {{total}} 项",
+    "selectHint": "选择一项 skill 查看详情",
+    "personal": "主库",
+    "project": "项目",
+    "readOnly": "只读",
+    "validationFailed": "校验失败",
+    "scripts": "scripts",
+    "uncommitted": "未提交",
+    "agentsUnlinked": "agents 未链接",
+    "openEditor": "打开编辑器",
+    "openFolder": "打开目录",
+    "openInEditor": "用编辑器打开",
+    "projectReadOnlyHint": "项目 skill 为只读，不可在此保存。",
+    "description": "描述",
+    "path": "路径",
+    "category": "分类"
+  },
+  "settings": {
+    "title": "设置",
+    "apiToken": "API Token",
+    "tokenHint": "从主库 ~/.cursor/skills/.csm/config.json 复制 api.token 粘贴到下方。",
+    "saveToken": "保存 Token",
+    "clear": "清除",
+    "invalidToken": "Token 无效，请重新填写",
+    "configReadonly": "当前配置（只读）",
+    "personalRoot": "主库",
+    "agents": "Agents",
+    "scanGlobs": "扫描路径",
+    "apiPort": "API 端口",
+    "serverToken": "服务端 Token",
+    "tokenConfigured": "已配置",
+    "tokenMissing": "未配置",
+    "locale": "界面语言",
+    "theme": "主题",
+    "savePrefs": "保存偏好",
+    "prefsSaved": "偏好已保存",
+    "firstUseToken": "首次使用请配置 API Token",
+    "openSettings": "打开设置"
+  },
+  "api": {
+    "connecting": "连接 API…",
+    "unreachable": "无法连接 API（:3847）",
+    "startHint": "请先运行 pnpm dev:api"
+  },
+  "editor": {
+    "loading": "加载编辑器…",
+    "loadFailed": "无法加载 skill",
+    "readOnly": "只读",
+    "tabEdit": "编辑",
+    "tabFiles": "文件",
+    "preview": "预览",
+    "unsaved": "有未保存的更改",
+    "save": "保存",
+    "saving": "保存中…",
+    "delete": "删除",
+    "deleteConfirm": "确定删除 skill「{{name}}」？此操作不可恢复（硬删除）。",
+    "fixValidation": "请先修复校验错误",
+    "saved": "已保存",
+    "saveFailed": "保存失败",
+    "deleteFailed": "删除失败"
+  },
+  "newSkill": {
+    "title": "新建 Skill",
+    "hint": "将在个人主库创建目录与 SKILL.md",
+    "name": "name（目录名）",
+    "category": "categoryPath（可选）",
+    "cancel": "取消",
+    "create": "创建",
+    "creating": "创建中…",
+    "createFailed": "创建失败"
+  },
+  "git": {
+    "title": "Git",
+    "clean": "干净",
+    "changes": "{{count}} 个变更",
+    "tabChanges": "变更",
+    "tabLog": "历史",
+    "workspaceClean": "工作区干净",
+    "selectDiff": "选择文件查看 diff",
+    "loadingDiff": "加载 diff…",
+    "noDiff": "（无 diff）",
+    "diffFailed": "无法加载 diff",
+    "commitPlaceholder": "feat(skills): …",
+    "commitSelected": "提交选中",
+    "commitAll": "全部提交",
+    "commitMessageRequired": "请填写 commit message",
+    "commitFailed": "提交失败",
+    "statusFailed": "Git 状态加载失败",
+    "noLog": "暂无提交记录"
+  },
+  "sync": {
+    "title": "同步 agents",
+    "scriptHint": "执行 scripts/sync-from-agents-skills.sh",
+    "running": "运行中…",
+    "noOutput": "（尚无输出）",
+    "exitCode": "脚本退出码 {{code}}",
+    "failed": "同步失败",
+    "start": "开始同步",
+    "cancel": "取消"
+  },
+  "files": {
+    "loading": "加载文件列表…",
+    "empty": "无附属文件（仅 SKILL.md）",
+    "dir": "目录",
+    "file": "文件"
+  },
+  "tree": {
+    "all": "全部",
+    "loading": "加载分类…",
+    "personal": "个人主库",
+    "personalAll": "全部个人",
+    "projectAll": "全部该项目"
+  },
+  "common": {
+    "loadFailed": "加载失败"
+  }
+}

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAppPreferences } from '../context/AppPreferences.js';
 import { AppLayout } from '../components/AppLayout.js';
 import { CategoryTree, type TreeSelection } from '../components/CategoryTree.js';
 import { SearchBar, type SourceFilter } from '../components/SearchBar.js';
@@ -41,6 +43,8 @@ export function SkillsPage({
   onOpenSettings: () => void;
   onEditSkill: (skillId: string) => void;
 }) {
+  const { t } = useTranslation();
+  const { locale } = useAppPreferences();
   const [query, setQuery] = useState('');
   const [source, setSource] = useState<SourceFilter>('all');
   const [gitDirtyOnly, setGitDirtyOnly] = useState(false);
@@ -59,7 +63,7 @@ export function SkillsPage({
   const load = useCallback(async () => {
     if (!getStoredToken()) {
       setLoading(false);
-      setToast('请先在设置中配置 API Token');
+      setToast(t('settings.firstUseToken'));
       return;
     }
     setLoading(true);
@@ -77,13 +81,13 @@ export function SkillsPage({
           ? e.message
           : e instanceof Error
             ? e.message
-            : '加载失败';
+            : t('common.loadFailed');
       setToast(msg);
       setItems([]);
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, source, gitDirtyOnly]);
+  }, [debouncedQuery, source, gitDirtyOnly, t]);
 
   useEffect(() => {
     if (!getStoredToken()) return;
@@ -103,27 +107,18 @@ export function SkillsPage({
   return (
     <>
       <AppLayout
-        title="Skills"
         onOpenSettings={onOpenSettings}
         headerActions={
           <>
-            <button
-              type="button"
-              onClick={() => setSyncOpen(true)}
-              className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800"
-            >
-              同步 agents
+            <button type="button" onClick={() => setSyncOpen(true)} className="csm-btn">
+              {t('nav.syncAgents')}
             </button>
             <button
               type="button"
               onClick={() => setGitOpen((o) => !o)}
-              className={`rounded-lg border px-3 py-2 text-sm ${
-                gitOpen
-                  ? 'border-emerald-700 bg-emerald-950/40 text-emerald-300'
-                  : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-              }`}
+              className={`csm-btn ${gitOpen ? 'border-emerald-600 bg-emerald-100 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : ''}`}
             >
-              Git
+              {t('nav.git')}
             </button>
           </>
         }
@@ -154,24 +149,26 @@ export function SkillsPage({
         }
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2 text-xs text-zinc-500">
-            <span>
-              {loading ? '加载中…' : `${filtered.length} / ${items.length} 项`}
+          <div className="csm-border flex items-center justify-between border-b px-4 py-2 text-xs">
+            <span className="csm-muted">
+              {loading
+                ? t('skills.loading')
+                : t('skills.count', { filtered: filtered.length, total: items.length })}
             </span>
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setNewOpen(true)}
-                className="text-emerald-500 hover:text-emerald-400"
+                className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-500 dark:hover:text-emerald-400"
               >
-                新建
+                {t('nav.new')}
               </button>
               <button
                 type="button"
                 onClick={() => load()}
-                className="text-emerald-500 hover:text-emerald-400"
+                className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-500 dark:hover:text-emerald-400"
               >
-                刷新
+                {t('nav.refresh')}
               </button>
             </div>
           </div>
@@ -180,6 +177,7 @@ export function SkillsPage({
             loading={loading}
             selectedId={selected?.skillId ?? null}
             onSelect={setSelected}
+            locale={locale}
           />
         </div>
       </AppLayout>
