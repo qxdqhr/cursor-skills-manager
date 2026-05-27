@@ -12,6 +12,7 @@
     "typecheck": "pnpm run -r typecheck",
     "test": "pnpm --filter @csm/core test",
     "verify:m1": "pnpm --filter @csm/core build && node scripts/verify-m1.mjs",
+    "verify:m2": "pnpm --filter @csm/core build && node scripts/verify-m2.mjs",
     "lint": "eslint ."
   },
   "engines": {
