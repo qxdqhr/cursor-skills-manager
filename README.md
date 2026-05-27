@@ -4,7 +4,7 @@
 
 **技术栈**：Vite + React（Web）· Hono（API）· `packages/core`（共享逻辑）
 
-**当前进度**：M0、M1 已提交；**M2（API + SQLite）已实现，待 git 提交**；下一步 M3（Web 列表/搜索）。详见 [doc/00-开发进度.md](./doc/00-开发进度.md)。
+**当前进度**：M0～M2 已提交；下一步 **M3**（Web 列表/搜索）。详见 [doc/00-开发进度.md](./doc/00-开发进度.md)。
 
 ## 开发
 
