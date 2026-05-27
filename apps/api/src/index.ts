@@ -5,6 +5,14 @@ import { getContext } from './context.js';
 const host = process.env.CSM_API_HOST ?? '127.0.0.1';
 const port = Number(process.env.CSM_API_PORT ?? '3847');
 
+const LOCAL_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+if (!LOCAL_HOSTS.has(host)) {
+  console.error(
+    `[csm/api] Refusing to bind to "${host}". Set CSM_API_HOST=127.0.0.1 for local-only access (AC-07).`,
+  );
+  process.exit(1);
+}
+
 const app = createApp();
 
 async function main() {
