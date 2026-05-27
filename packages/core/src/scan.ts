@@ -103,6 +103,63 @@ async function scanDir(
   }
 }
 
+/** 扫描单个 skill 目录（写入后刷新元数据） */
+export async function scanPersonalSkillAt(
+  root: string,
+  skillDir: string,
+  options: Pick<ScanPersonalOptions, 'agentsRoot' | 'checkAgents'> = {},
+): Promise<SkillSummary> {
+  const skillMd = join(skillDir, 'SKILL.md');
+  if (!existsSync(skillMd)) {
+    throw new Error(`SKILL.md not found: ${skillMd}`);
+  }
+  const name = skillNameFromDir(skillDir);
+  const rel = toPosixPath(skillDir.slice(root.length).replace(/^[/\\]/, ''));
+  let parsed: Awaited<ReturnType<typeof parseSkillMdFile>>;
+  let validation: { ok: boolean; errors: ValidationError[] };
+  try {
+    parsed = await parseSkillMdFile(skillMd);
+    validation = validateSkill({
+      directoryName: name,
+      frontmatter: parsed.frontmatter,
+    });
+  } catch (err) {
+    parsed = {
+      frontmatter: { name, description: '' },
+      bodyMarkdown: '',
+    };
+    validation = {
+      ok: false,
+      errors: [
+        {
+          field: 'SKILL.md',
+          code: 'PARSE_ERROR',
+          message: err instanceof Error ? err.message : String(err),
+        },
+      ],
+    };
+  }
+  const st = await stat(skillMd);
+  const summary: SkillSummary = {
+    skillId: buildSkillId('personal', root, skillDir),
+    source: 'personal',
+    readOnly: false,
+    name,
+    description: parsed.frontmatter.description || '',
+    categoryPath: parseCategoryPath(rel, name),
+    relativePath: rel,
+    rootPath: root,
+    skillMdPath: skillMd,
+    hasScripts: await hasScriptsDir(skillDir),
+    mtimeMs: st.mtimeMs,
+    validation,
+  };
+  if (options.checkAgents && options.agentsRoot) {
+    summary.agentsLink = await checkAgentsLink(name, options.agentsRoot, root);
+  }
+  return summary;
+}
+
 /** 递归扫描个人主库下所有 skill（含 SKILL.md 的目录） */
 export async function scanPersonalSkills(options: ScanPersonalOptions): Promise<SkillSummary[]> {
   const root = options.root;

@@ -178,6 +178,64 @@ export function searchSkillIds(
   }
 }
 
+export async function indexUpsert(
+  db: Database.Database,
+  skill: SkillSummary,
+  gitDirty = false,
+): Promise<void> {
+  let body = '';
+  try {
+    const parsed = await parseSkillMdFile(skill.skillMdPath);
+    body = parsed.bodyMarkdown;
+  } catch {
+    body = '';
+  }
+
+  const run = db.transaction(() => {
+    db.prepare('DELETE FROM skills_meta WHERE skill_id = ?').run(skill.skillId);
+    db.prepare('DELETE FROM skills_fts WHERE skill_id = ?').run(skill.skillId);
+
+    db.prepare(`
+      INSERT INTO skills_meta (
+        skill_id, name, source, root_path, category_path,
+        has_scripts, mtime, validation_ok, git_dirty
+      ) VALUES (
+        @skill_id, @name, @source, @root_path, @category_path,
+        @has_scripts, @mtime, @validation_ok, @git_dirty
+      )
+    `).run({
+      skill_id: skill.skillId,
+      name: skill.name,
+      source: skill.source,
+      root_path: skill.rootPath,
+      category_path: skill.categoryPath,
+      has_scripts: skill.hasScripts ? 1 : 0,
+      mtime: skill.mtimeMs,
+      validation_ok: skill.validation.ok ? 1 : 0,
+      git_dirty: gitDirty ? 1 : 0,
+    });
+
+    db.prepare(`
+      INSERT INTO skills_fts (skill_id, name, description, body, source, root_path)
+      VALUES (@skill_id, @name, @description, @body, @source, @root_path)
+    `).run({
+      skill_id: skill.skillId,
+      name: skill.name,
+      description: skill.description,
+      body,
+      source: skill.source,
+      root_path: skill.rootPath,
+    });
+  });
+
+  run();
+}
+
+export function indexDelete(db: Database.Database, skillId: string): void {
+  db.prepare('DELETE FROM skills_meta WHERE skill_id = ?').run(skillId);
+  db.prepare('DELETE FROM skills_fts WHERE skill_id = ?').run(skillId);
+}
+
 export function filterSkillIds(
   db: Database.Database,
   opts: {
