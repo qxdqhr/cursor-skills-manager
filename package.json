@@ -10,6 +10,8 @@
     "dev:web": "pnpm --filter @csm/web dev",
     "build": "pnpm run -r build",
     "typecheck": "pnpm run -r typecheck",
+    "test": "pnpm --filter @csm/core test",
+    "verify:m1": "pnpm --filter @csm/core build && node scripts/verify-m1.mjs",
     "lint": "eslint ."
   },
   "engines": {
