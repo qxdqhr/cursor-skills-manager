@@ -18,6 +18,13 @@ import {
   getSkillDetail,
   loadAllSkills,
 } from './services/skills.js';
+import {
+  getSkillFilesFor,
+  postSkill,
+  putSkill,
+  removeSkill,
+  validateSkillDraft,
+} from './services/skillWrite.js';
 
 type Env = { Variables: { ctx: AppContext } };
 
@@ -112,12 +119,69 @@ export function createApp() {
     return jsonOk(c, buildSkillsTree(personal, project));
   });
 
+  app.post('/skills/validate', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as {
+      skillId?: string;
+      frontmatter: Record<string, unknown>;
+      bodyMarkdown?: string;
+    };
+    const result = validateSkillDraft({
+      skillId: body.skillId,
+      frontmatter: body.frontmatter as import('@csm/core').SkillFrontmatter,
+      bodyMarkdown: body.bodyMarkdown,
+      personalRoot: ctx.config.paths.personalRoot,
+    });
+    return jsonOk(c, result);
+  });
+
+  app.post('/skills', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as {
+      name: string;
+      categoryPath?: string;
+      template?: 'blank';
+      copyFromSkillId?: string | null;
+    };
+    const detail = await postSkill(ctx, body);
+    return c.json({ ok: true, data: detail }, 201);
+  });
+
+  app.get('/skills/:skillId/files', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const result = await getSkillFilesFor(ctx.config, skillId);
+    return jsonOk(c, result);
+  });
+
   app.get('/skills/:skillId', async (c) => {
     const ctx = c.get('ctx');
     const skillId = c.req.param('skillId');
     const { all } = await loadAllSkills(ctx.config);
     const detail = await getSkillDetail(all, skillId);
     return jsonOk(c, detail);
+  });
+
+  app.put('/skills/:skillId', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const body = (await c.req.json()) as {
+      frontmatter: Record<string, unknown>;
+      bodyMarkdown: string;
+    };
+    const detail = await putSkill(ctx, skillId, {
+      frontmatter: body.frontmatter as import('@csm/core').SkillFrontmatter,
+      bodyMarkdown: body.bodyMarkdown,
+    });
+    return jsonOk(c, detail);
+  });
+
+  app.delete('/skills/:skillId', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const mode = c.req.query('mode') === 'soft' ? 'soft' : 'hard';
+    const result = await removeSkill(ctx, skillId, mode);
+    return jsonOk(c, result);
   });
 
   app.get('/search', async (c) => {
