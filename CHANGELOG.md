@@ -8,7 +8,15 @@
 
 ### Added
 
-- （下一步 M4）双栏编辑与保存
+- （下一步 M5）Git 面板与 agents 同步脚本
+
+## [0.0.5] - 2026-05-27
+
+### Added
+
+- M4：主库 skill 写入（validate / PUT / POST / DELETE / files）
+- `indexUpsert` / `indexDelete` 单条索引更新
+- Web 双栏编辑：CodeMirror + react-markdown 预览、新建与删除
 
 ## [0.0.4] - 2026-05-27
 
