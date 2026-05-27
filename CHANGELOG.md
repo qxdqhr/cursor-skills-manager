@@ -8,7 +8,14 @@
 
 ### Added
 
-- （下一步 M5）Git 面板与 agents 同步脚本
+- （下一步 M6）i18n 与 MVP 验收
+
+## [0.0.6] - 2026-05-27
+
+### Added
+
+- M5：Git status/diff/commit/log、sync-agents、agents-links、POST /open
+- Web Git 侧栏、同步 agents Modal、未提交筛选与打开目录
 
 ## [0.0.5] - 2026-05-27
 

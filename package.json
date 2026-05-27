@@ -14,6 +14,7 @@
     "verify:m1": "pnpm --filter @csm/core build && node scripts/verify-m1.mjs",
     "verify:m2": "pnpm --filter @csm/core build && node scripts/verify-m2.mjs",
     "verify:m4": "pnpm --filter @csm/core build && node scripts/verify-m4.mjs",
+    "verify:m5": "pnpm --filter @csm/core build && node scripts/verify-m5.mjs",
     "lint": "eslint ."
   },
   "engines": {
