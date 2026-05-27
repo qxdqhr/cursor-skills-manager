@@ -43,6 +43,7 @@ export interface SkillSummary {
   mtimeMs: number;
   validation: { ok: boolean; errors: ValidationError[] };
   agentsLink?: AgentsLinkStatus;
+  git?: { dirty: boolean };
 }
 
 export interface SkillDetail extends SkillSummary {

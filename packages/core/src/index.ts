@@ -14,3 +14,5 @@ export * from './gitDirty.js';
 export * from './serialize.js';
 export * from './writeSkill.js';
 export * from './skillErrors.js';
+export * from './gitService.js';
+export * from './integrations.js';
