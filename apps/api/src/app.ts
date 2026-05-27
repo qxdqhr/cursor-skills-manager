@@ -1,0 +1,162 @@
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import {
+  CSM_VERSION,
+  publicConfig,
+  saveConfig,
+  searchSkillIds,
+  type CsmConfig,
+} from '@csm/core';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { getContext, refreshIndex, type AppContext } from './context.js';
+import { bearerAuth } from './middleware/auth.js';
+import { ApiError, jsonError, jsonOk } from './errors.js';
+import {
+  buildSkillsTree,
+  filterBySource,
+  getSkillDetail,
+  loadAllSkills,
+} from './services/skills.js';
+
+type Env = { Variables: { ctx: AppContext } };
+
+export function createApp() {
+  const app = new Hono<Env>().basePath('/api/v1');
+
+  app.use(
+    '*',
+    cors({
+      origin: (origin) => {
+        if (!origin) return 'http://localhost:5173';
+        if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return origin;
+        return 'http://localhost:5173';
+      },
+    }),
+  );
+
+  app.use('*', async (c, next) => {
+    try {
+      const ctx = await getContext();
+      c.set('ctx', ctx);
+      await next();
+    } catch (e) {
+      return jsonError(c, e instanceof Error ? e : new Error(String(e)));
+    }
+  });
+
+  app.get('/health', async (c) => {
+    const ctx = c.get('ctx');
+    const personalRoot = ctx.config.paths.personalRoot;
+    const rootExists = existsSync(personalRoot);
+    let isGitRepo = false;
+    if (rootExists) {
+      isGitRepo = existsSync(join(personalRoot, '.git'));
+    }
+    return jsonOk(c, {
+      status: 'ok',
+      version: CSM_VERSION,
+      personalRoot,
+      personalRootExists: rootExists,
+      isGitRepo,
+      hasToken: Boolean(ctx.config.api.token),
+      indexOk: true,
+    });
+  });
+
+  app.use('*', async (c, next) => {
+    const path = c.req.path;
+    if (path === '/health' || path.endsWith('/health')) {
+      await next();
+      return;
+    }
+    await bearerAuth()(c, next);
+  });
+
+  app.get('/config', (c) => {
+    const ctx = c.get('ctx');
+    return jsonOk(c, publicConfig(ctx.config));
+  });
+
+  app.patch('/config', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as Partial<CsmConfig>;
+    const next = await saveConfig(ctx.config.paths.personalRoot, body);
+    ctx.config = next;
+    return jsonOk(c, publicConfig(next));
+  });
+
+  app.get('/skills', async (c) => {
+    const ctx = c.get('ctx');
+    const q = c.req.query('q')?.trim();
+    const source = c.req.query('source');
+    const { all } = await loadAllSkills(ctx.config);
+    let items = filterBySource(all, source);
+
+    if (q) {
+      const hits = searchSkillIds(ctx.db, q);
+      const idSet = new Set(hits.map((h) => h.skillId));
+      items = items.filter((s) => idSet.has(s.skillId));
+      const scoreMap = new Map(hits.map((h) => [h.skillId, h.score]));
+      items.sort((a, b) => (scoreMap.get(b.skillId) ?? 0) - (scoreMap.get(a.skillId) ?? 0));
+    } else {
+      items.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return jsonOk(c, { items, total: items.length });
+  });
+
+  app.get('/skills/tree', async (c) => {
+    const ctx = c.get('ctx');
+    const { personal, project } = await loadAllSkills(ctx.config);
+    return jsonOk(c, buildSkillsTree(personal, project));
+  });
+
+  app.get('/skills/:skillId', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const { all } = await loadAllSkills(ctx.config);
+    const detail = await getSkillDetail(all, skillId);
+    return jsonOk(c, detail);
+  });
+
+  app.get('/search', async (c) => {
+    const ctx = c.get('ctx');
+    const q = c.req.query('q')?.trim() ?? '';
+    if (!q) {
+      return jsonOk(c, { items: [] });
+    }
+    const hits = searchSkillIds(ctx.db, q);
+    const { all } = await loadAllSkills(ctx.config);
+    const byId = new Map(all.map((s) => [s.skillId, s]));
+    const items = hits
+      .map((h) => {
+        const skill = byId.get(h.skillId);
+        if (!skill) return null;
+        return {
+          skillId: h.skillId,
+          score: h.score,
+          snippets: [{ field: 'description', text: skill.description.slice(0, 120) }],
+        };
+      })
+      .filter(Boolean);
+    return jsonOk(c, { items });
+  });
+
+  app.post('/index/rebuild', async (c) => {
+    const ctx = c.get('ctx');
+    try {
+      const result = await refreshIndex(ctx);
+      return jsonOk(c, result);
+    } catch (e) {
+      throw new ApiError(
+        'INDEX_ERROR',
+        e instanceof Error ? e.message : 'Index rebuild failed',
+      );
+    }
+  });
+
+  app.onError((err, c) => jsonError(c, err));
+
+  return app;
+}
