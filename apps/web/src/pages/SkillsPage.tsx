@@ -6,6 +6,8 @@ import { SkillDetailPanel } from '../components/SkillDetailPanel.js';
 import { SkillList } from '../components/SkillList.js';
 import { Toast } from '../components/Toast.js';
 import { NewSkillDialog } from '../components/NewSkillDialog.js';
+import { GitPanel } from '../components/GitPanel.js';
+import { SyncAgentsModal } from '../components/SyncAgentsModal.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { ApiClientError, fetchSkills, fetchSkillsTree } from '../lib/api.js';
 import { getStoredToken } from '../lib/token.js';
@@ -41,6 +43,9 @@ export function SkillsPage({
 }) {
   const [query, setQuery] = useState('');
   const [source, setSource] = useState<SourceFilter>('all');
+  const [gitDirtyOnly, setGitDirtyOnly] = useState(false);
+  const [gitOpen, setGitOpen] = useState(false);
+  const [syncOpen, setSyncOpen] = useState(false);
   const [treeSelection, setTreeSelection] = useState<TreeSelection>({ type: 'all' });
   const [tree, setTree] = useState<SkillsTree | null>(null);
   const [items, setItems] = useState<SkillSummary[]>([]);
@@ -63,6 +68,7 @@ export function SkillsPage({
       const { items: list } = await fetchSkills({
         q: debouncedQuery || undefined,
         source: sourceParam,
+        gitDirty: gitDirtyOnly || undefined,
       });
       setItems(list);
     } catch (e) {
@@ -77,7 +83,7 @@ export function SkillsPage({
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, source]);
+  }, [debouncedQuery, source, gitDirtyOnly]);
 
   useEffect(() => {
     if (!getStoredToken()) return;
@@ -99,12 +105,36 @@ export function SkillsPage({
       <AppLayout
         title="Skills"
         onOpenSettings={onOpenSettings}
+        headerActions={
+          <>
+            <button
+              type="button"
+              onClick={() => setSyncOpen(true)}
+              className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800"
+            >
+              同步 agents
+            </button>
+            <button
+              type="button"
+              onClick={() => setGitOpen((o) => !o)}
+              className={`rounded-lg border px-3 py-2 text-sm ${
+                gitOpen
+                  ? 'border-emerald-700 bg-emerald-950/40 text-emerald-300'
+                  : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+              }`}
+            >
+              Git
+            </button>
+          </>
+        }
         toolbar={
           <SearchBar
             query={query}
             onQueryChange={setQuery}
             source={source}
             onSourceChange={setSource}
+            gitDirtyOnly={gitDirtyOnly}
+            onGitDirtyOnlyChange={setGitDirtyOnly}
           />
         }
         sidebar={
@@ -118,6 +148,9 @@ export function SkillsPage({
               onEditSkill(id);
             }}
           />
+        }
+        gitPanel={
+          <GitPanel open={gitOpen} onClose={() => setGitOpen(false)} onCommitted={() => load()} />
         }
       >
         <div className="flex h-full flex-col">
@@ -151,6 +184,11 @@ export function SkillsPage({
         </div>
       </AppLayout>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      <SyncAgentsModal
+        open={syncOpen}
+        onClose={() => setSyncOpen(false)}
+        onDone={() => load()}
+      />
       <NewSkillDialog
         open={newOpen}
         onClose={() => setNewOpen(false)}

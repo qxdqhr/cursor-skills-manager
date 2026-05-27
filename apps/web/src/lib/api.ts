@@ -16,6 +16,7 @@ export class ApiClientError extends Error {
     message: string,
     public code?: string,
     public status?: number,
+    public details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'ApiClientError';
@@ -41,7 +42,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const json = (await res.json()) as ApiOkBody<T> | ApiErrorBody;
 
   if (!json.ok) {
-    throw new ApiClientError(json.error.message, json.error.code, res.status);
+    throw new ApiClientError(
+      json.error.message,
+      json.error.code,
+      res.status,
+      json.error.details,
+    );
   }
   return json.data;
 }
@@ -72,10 +78,12 @@ export async function fetchConfig(): Promise<PublicConfig> {
 export async function fetchSkills(params: {
   q?: string;
   source?: string;
+  gitDirty?: boolean;
 }): Promise<{ items: SkillSummary[]; total: number }> {
   const sp = new URLSearchParams();
   if (params.q) sp.set('q', params.q);
   if (params.source) sp.set('source', params.source);
+  if (params.gitDirty) sp.set('gitDirty', 'true');
   const qs = sp.toString();
   return request(`/skills${qs ? `?${qs}` : ''}`);
 }
@@ -139,6 +147,67 @@ export async function postSkill(body: {
     throw new ApiClientError(json.error.message, json.error.code, res.status);
   }
   return json.data;
+}
+
+export type GitStatus = {
+  branch: string;
+  clean: boolean;
+  files: { path: string; status: string }[];
+};
+
+export type GitLogEntry = {
+  hash: string;
+  date: string;
+  message: string;
+  author: string;
+};
+
+export async function fetchGitStatus(): Promise<GitStatus> {
+  return request<GitStatus>('/git/status');
+}
+
+export async function fetchGitDiff(path?: string): Promise<{ path: string | null; diff: string }> {
+  const qs = path ? `?path=${encodeURIComponent(path)}` : '';
+  return request(`/git/diff${qs}`);
+}
+
+export async function postGitCommit(body: {
+  message: string;
+  paths?: string[];
+}): Promise<{ hash: string; summary: { changes: number; insertions: number; deletions: number } }> {
+  return request('/git/commit', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export async function fetchGitLog(params?: {
+  path?: string;
+  limit?: number;
+}): Promise<{ items: GitLogEntry[] }> {
+  const sp = new URLSearchParams();
+  if (params?.path) sp.set('path', params.path);
+  if (params?.limit) sp.set('limit', String(params.limit));
+  const qs = sp.toString();
+  return request(`/git/log${qs ? `?${qs}` : ''}`);
+}
+
+export async function postSyncAgents(): Promise<{
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}> {
+  return request('/integrations/sync-agents', { method: 'POST' });
+}
+
+export async function fetchAgentsLinks(): Promise<{
+  items: { name: string; skillId: string; agentsLink: { exists: boolean; ok: boolean; target: string | null } }[];
+}> {
+  return request('/integrations/agents-links');
+}
+
+export async function postOpenTarget(body: {
+  skillId: string;
+  target: 'folder' | 'editor' | 'terminal';
+}): Promise<{ opened: string }> {
+  return request('/open', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export async function deleteSkill(

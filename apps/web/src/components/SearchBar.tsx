@@ -5,11 +5,15 @@ export function SearchBar({
   onQueryChange,
   source,
   onSourceChange,
+  gitDirtyOnly,
+  onGitDirtyOnlyChange,
 }: {
   query: string;
   onQueryChange: (q: string) => void;
   source: SourceFilter;
   onSourceChange: (s: SourceFilter) => void;
+  gitDirtyOnly: boolean;
+  onGitDirtyOnlyChange: (v: boolean) => void;
 }) {
   return (
     <div className="flex flex-1 flex-wrap items-center gap-2">
@@ -30,6 +34,15 @@ export function SearchBar({
         <option value="personal">个人主库</option>
         <option value="project">项目只读</option>
       </select>
+      <label className="flex items-center gap-1.5 text-sm text-zinc-400">
+        <input
+          type="checkbox"
+          checked={gitDirtyOnly}
+          onChange={(e) => onGitDirtyOnlyChange(e.target.checked)}
+          className="rounded border-zinc-600"
+        />
+        仅未提交
+      </label>
     </div>
   );
 }

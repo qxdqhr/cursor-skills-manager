@@ -1,3 +1,4 @@
+import { ApiClientError, postOpenTarget } from '../lib/api.js';
 import type { SkillSummary } from '../types.js';
 
 export function SkillDetailPanel({
@@ -24,15 +25,43 @@ export function SkillDetailPanel({
           项目 skill 为只读，不可在此保存。可复制到主库（M4 向导）。
         </p>
       )}
-      {!skill.readOnly && skill.source === 'personal' && onEdit && (
-        <button
-          type="button"
-          onClick={() => onEdit(skill.skillId)}
-          className="mt-4 w-full rounded-lg bg-emerald-800/80 py-2 text-sm text-white hover:bg-emerald-700"
-        >
-          打开编辑器
-        </button>
-      )}
+      <div className="mt-4 flex flex-col gap-2">
+        {!skill.readOnly && skill.source === 'personal' && onEdit && (
+          <button
+            type="button"
+            onClick={() => onEdit(skill.skillId)}
+            className="w-full rounded-lg bg-emerald-800/80 py-2 text-sm text-white hover:bg-emerald-700"
+          >
+            打开编辑器
+          </button>
+        )}
+        {skill.source === 'personal' && (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                postOpenTarget({ skillId: skill.skillId, target: 'folder' }).catch((e) =>
+                  alert(e instanceof ApiClientError ? e.message : '打开失败'),
+                )
+              }
+              className="flex-1 rounded-lg border border-zinc-700 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800"
+            >
+              打开目录
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                postOpenTarget({ skillId: skill.skillId, target: 'editor' }).catch((e) =>
+                  alert(e instanceof ApiClientError ? e.message : '打开失败'),
+                )
+              }
+              className="flex-1 rounded-lg border border-zinc-700 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800"
+            >
+              用编辑器打开
+            </button>
+          </div>
+        )}
+      </div>
       <dl className="mt-4 space-y-2 text-sm">
         <Row label="描述" value={skill.description} />
         <Row label="路径" value={skill.skillMdPath} mono />

@@ -74,6 +74,11 @@ export function SkillList({
                   scripts
                 </span>
               )}
+              {skill.git?.dirty && (
+                <span className="rounded bg-violet-900/40 px-1.5 py-0.5 text-xs text-violet-200">
+                  未提交
+                </span>
+              )}
               {skill.agentsLink && !skill.agentsLink.ok && (
                 <span className="rounded bg-orange-900/40 px-1.5 py-0.5 text-xs text-orange-200">
                   agents 未链接

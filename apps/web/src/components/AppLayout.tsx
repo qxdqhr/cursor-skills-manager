@@ -6,14 +6,18 @@ export function AppLayout({
   sidebar,
   children,
   detail,
+  gitPanel,
   onOpenSettings,
+  headerActions,
 }: {
   title: string;
   toolbar: ReactNode;
   sidebar: ReactNode;
   children: ReactNode;
   detail?: ReactNode;
+  gitPanel?: ReactNode;
   onOpenSettings: () => void;
+  headerActions?: ReactNode;
 }) {
   return (
     <div className="flex h-screen flex-col bg-zinc-950 text-zinc-100">
@@ -23,6 +27,7 @@ export function AppLayout({
           <p className="text-xs text-zinc-500">Cursor Skills Manager</p>
         </div>
         {toolbar}
+        {headerActions}
         <button
           type="button"
           onClick={onOpenSettings}
@@ -37,6 +42,7 @@ export function AppLayout({
         </aside>
         <main className="flex min-w-0 flex-1 flex-col">{children}</main>
         {detail && <aside className="w-80 shrink-0 overflow-y-auto">{detail}</aside>}
+        {gitPanel}
       </div>
     </div>
   );
