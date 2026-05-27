@@ -1,11 +1,16 @@
 import type { SkillSummary } from '../types.js';
 
-/** M3 只读预览；M4 将接入完整编辑 */
-export function SkillDetailPanel({ skill }: { skill: SkillSummary | null }) {
+export function SkillDetailPanel({
+  skill,
+  onEdit,
+}: {
+  skill: SkillSummary | null;
+  onEdit?: (skillId: string) => void;
+}) {
   if (!skill) {
     return (
       <div className="flex h-full items-center justify-center border-l border-zinc-800 p-6 text-sm text-zinc-600">
-        选择一项 skill 查看详情（编辑功能见 M4）
+        选择一项 skill 查看详情
       </div>
     );
   }
@@ -18,6 +23,15 @@ export function SkillDetailPanel({ skill }: { skill: SkillSummary | null }) {
         <p className="mt-3 rounded-lg border border-amber-900/50 bg-amber-950/30 px-3 py-2 text-sm text-amber-200">
           项目 skill 为只读，不可在此保存。可复制到主库（M4 向导）。
         </p>
+      )}
+      {!skill.readOnly && skill.source === 'personal' && onEdit && (
+        <button
+          type="button"
+          onClick={() => onEdit(skill.skillId)}
+          className="mt-4 w-full rounded-lg bg-emerald-800/80 py-2 text-sm text-white hover:bg-emerald-700"
+        >
+          打开编辑器
+        </button>
       )}
       <dl className="mt-4 space-y-2 text-sm">
         <Row label="描述" value={skill.description} />

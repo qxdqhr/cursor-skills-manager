@@ -1,5 +1,15 @@
 import { getStoredToken } from './token.js';
-import type { ApiErrorBody, ApiOkBody, PublicConfig, SkillSummary, SkillsTree } from '../types.js';
+import type {
+  ApiErrorBody,
+  ApiOkBody,
+  PublicConfig,
+  SkillDetail,
+  SkillFileEntry,
+  SkillFrontmatter,
+  SkillSummary,
+  SkillsTree,
+  ValidateResult,
+} from '../types.js';
 
 export class ApiClientError extends Error {
   constructor(
@@ -76,4 +86,66 @@ export async function fetchSkillsTree(): Promise<SkillsTree> {
 
 export async function postIndexRebuild(): Promise<{ count: number; durationMs: number }> {
   return request('/index/rebuild', { method: 'POST' });
+}
+
+export async function fetchSkillDetail(skillId: string): Promise<SkillDetail> {
+  return request<SkillDetail>(`/skills/${encodeURIComponent(skillId)}`);
+}
+
+export async function fetchSkillFiles(skillId: string): Promise<{ files: SkillFileEntry[] }> {
+  return request(`/skills/${encodeURIComponent(skillId)}/files`);
+}
+
+export async function validateSkillDraft(body: {
+  skillId?: string;
+  frontmatter: Partial<SkillFrontmatter>;
+  bodyMarkdown?: string;
+}): Promise<ValidateResult> {
+  return request('/skills/validate', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function putSkill(
+  skillId: string,
+  body: { frontmatter: Partial<SkillFrontmatter>; bodyMarkdown: string },
+): Promise<SkillDetail> {
+  return request(`/skills/${encodeURIComponent(skillId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function postSkill(body: {
+  name: string;
+  categoryPath?: string;
+  template?: 'blank';
+  copyFromSkillId?: string | null;
+}): Promise<SkillDetail> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${BASE}/skills`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+  const json = (await res.json()) as ApiOkBody<SkillDetail> | ApiErrorBody;
+  if (!json.ok) {
+    throw new ApiClientError(json.error.message, json.error.code, res.status);
+  }
+  return json.data;
+}
+
+export async function deleteSkill(
+  skillId: string,
+  mode: 'soft' | 'hard' = 'hard',
+): Promise<{ deleted: true; skillId: string }> {
+  return request(`/skills/${encodeURIComponent(skillId)}?mode=${mode}`, {
+    method: 'DELETE',
+  });
 }

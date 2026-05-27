@@ -5,6 +5,7 @@ import { SearchBar, type SourceFilter } from '../components/SearchBar.js';
 import { SkillDetailPanel } from '../components/SkillDetailPanel.js';
 import { SkillList } from '../components/SkillList.js';
 import { Toast } from '../components/Toast.js';
+import { NewSkillDialog } from '../components/NewSkillDialog.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { ApiClientError, fetchSkills, fetchSkillsTree } from '../lib/api.js';
 import { getStoredToken } from '../lib/token.js';
@@ -31,7 +32,13 @@ function matchesTree(skill: SkillSummary, sel: TreeSelection): boolean {
   );
 }
 
-export function SkillsPage({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function SkillsPage({
+  onOpenSettings,
+  onEditSkill,
+}: {
+  onOpenSettings: () => void;
+  onEditSkill: (skillId: string) => void;
+}) {
   const [query, setQuery] = useState('');
   const [source, setSource] = useState<SourceFilter>('all');
   const [treeSelection, setTreeSelection] = useState<TreeSelection>({ type: 'all' });
@@ -40,6 +47,7 @@ export function SkillsPage({ onOpenSettings }: { onOpenSettings: () => void }) {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SkillSummary | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [newOpen, setNewOpen] = useState(false);
 
   const debouncedQuery = useDebounce(query, 300);
 
@@ -102,20 +110,37 @@ export function SkillsPage({ onOpenSettings }: { onOpenSettings: () => void }) {
         sidebar={
           <CategoryTree tree={tree} selection={treeSelection} onSelect={setTreeSelection} />
         }
-        detail={<SkillDetailPanel skill={selected} />}
+        detail={
+          <SkillDetailPanel
+            skill={selected}
+            onEdit={(id) => {
+              if (selected?.readOnly) return;
+              onEditSkill(id);
+            }}
+          />
+        }
       >
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2 text-xs text-zinc-500">
             <span>
               {loading ? '加载中…' : `${filtered.length} / ${items.length} 项`}
             </span>
-            <button
-              type="button"
-              onClick={() => load()}
-              className="text-emerald-500 hover:text-emerald-400"
-            >
-              刷新
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setNewOpen(true)}
+                className="text-emerald-500 hover:text-emerald-400"
+              >
+                新建
+              </button>
+              <button
+                type="button"
+                onClick={() => load()}
+                className="text-emerald-500 hover:text-emerald-400"
+              >
+                刷新
+              </button>
+            </div>
           </div>
           <SkillList
             items={filtered}
@@ -126,6 +151,14 @@ export function SkillsPage({ onOpenSettings }: { onOpenSettings: () => void }) {
         </div>
       </AppLayout>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      <NewSkillDialog
+        open={newOpen}
+        onClose={() => setNewOpen(false)}
+        onCreated={(id) => {
+          load();
+          onEditSkill(id);
+        }}
+      />
     </>
   );
 }

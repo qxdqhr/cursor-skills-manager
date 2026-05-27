@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { SkillsPage } from './pages/SkillsPage.js';
 import { SettingsPage } from './pages/SettingsPage.js';
+import { SkillEditorPage } from './pages/SkillEditorPage.js';
 import { fetchHealth } from './lib/api.js';
 import { getStoredToken } from './lib/token.js';
 
@@ -8,6 +9,7 @@ type View = 'skills' | 'settings';
 
 export default function App() {
   const [view, setView] = useState<View>('skills');
+  const [editSkillId, setEditSkillId] = useState<string | null>(null);
   const [apiOk, setApiOk] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -54,5 +56,21 @@ export default function App() {
     return <SettingsPage onBack={() => setView('skills')} />;
   }
 
-  return <SkillsPage onOpenSettings={() => setView('settings')} />;
+  if (editSkillId) {
+    return (
+      <SkillEditorPage
+        skillId={editSkillId}
+        onBack={() => setEditSkillId(null)}
+        onSaved={() => undefined}
+        onDeleted={() => setEditSkillId(null)}
+      />
+    );
+  }
+
+  return (
+    <SkillsPage
+      onOpenSettings={() => setView('settings')}
+      onEditSkill={(id) => setEditSkillId(id)}
+    />
+  );
 }

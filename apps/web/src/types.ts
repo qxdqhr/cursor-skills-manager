@@ -61,3 +61,28 @@ export interface ApiOkBody<T> {
   ok: true;
   data: T;
 }
+
+export interface SkillFrontmatter {
+  name: string;
+  description: string;
+  paths?: string | string[];
+  'disable-model-invocation'?: boolean;
+  metadata?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export interface SkillDetail extends SkillSummary {
+  frontmatter: SkillFrontmatter;
+  bodyMarkdown: string;
+}
+
+export interface SkillFileEntry {
+  relativePath: string;
+  type: 'file' | 'directory';
+  size?: number;
+}
+
+export interface ValidateResult {
+  ok: boolean;
+  errors: ValidationError[];
+}
