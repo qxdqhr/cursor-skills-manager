@@ -8,3 +8,6 @@ export * from './validate.js';
 export * from './scan.js';
 export * from './projectScan.js';
 export * from './agentsLink.js';
+export * from './config.js';
+export * from './db/index.js';
+export * from './gitDirty.js';
