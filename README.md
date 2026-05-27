@@ -4,6 +4,8 @@
 
 **技术栈**：Vite + React（Web）· Hono（API）· `packages/core`（共享逻辑）
 
+**当前进度**：M0、M1 已提交；**M2（API + SQLite）已实现，待 git 提交**；下一步 M3（Web 列表/搜索）。详见 [doc/00-开发进度.md](./doc/00-开发进度.md)。
+
 ## 开发
 
 ```bash
@@ -22,12 +24,23 @@ pnpm dev:web    # 仅 Web（需 API 或代理目标已启动）
 pnpm typecheck
 pnpm test
 pnpm verify:m1   # 对真实 ~/.cursor/skills 扫描验收
+pnpm verify:m2   # API 鉴权 + 列表/搜索/索引（需先 pnpm dev:api）
+```
+
+### API 鉴权（M2）
+
+Token 写在主库 `~/.cursor/skills/.csm/config.json` 的 `api.token`（首次启动 API 自动生成）：
+
+```bash
+TOKEN=$(jq -r '.api.token' ~/.cursor/skills/.csm/config.json)
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:3847/api/v1/skills
 ```
 
 ## 文档
 
 | 文件 | 说明 |
 |------|------|
+| [doc/00-开发进度.md](./doc/00-开发进度.md) | **当前里程碑、自测结果、下一步** |
 | [doc/01-cursor-skills-manager-需求文档.md](./doc/01-cursor-skills-manager-需求文档.md) | 产品需求、功能范围、验收标准 |
 | [doc/03-平台选型-Web与桌面端对比.md](./doc/03-平台选型-Web与桌面端对比.md) | Web / 桌面 / 混合方案对比与推荐 |
 | [doc/04-接口与数据字典草案.md](./doc/04-接口与数据字典草案.md) | REST API、SQLite、文件 schema |
