@@ -20,6 +20,8 @@ pnpm dev               # API :3847 + Web :5173
 pnpm dev:api    # 仅 API
 pnpm dev:web    # 仅 Web（需 API 或代理目标已启动）
 pnpm typecheck
+pnpm test
+pnpm verify:m1   # 对真实 ~/.cursor/skills 扫描验收
 ```
 
 ## 文档
