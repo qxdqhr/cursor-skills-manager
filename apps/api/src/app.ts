@@ -5,6 +5,7 @@ import {
   publicConfig,
   saveConfig,
   searchSkillIds,
+  gitDirtySkillIds,
   type CsmConfig,
 } from '@csm/core';
 import { existsSync } from 'node:fs';
@@ -25,6 +26,8 @@ import {
   removeSkill,
   validateSkillDraft,
 } from './services/skillWrite.js';
+import { getGitDiff, getGitLog, getGitStatus, postGitCommit } from './services/git.js';
+import { getAgentsLinks, openTarget, syncAgents } from './services/integrations.js';
 
 type Env = { Variables: { ctx: AppContext } };
 
@@ -97,8 +100,17 @@ export function createApp() {
     const ctx = c.get('ctx');
     const q = c.req.query('q')?.trim();
     const source = c.req.query('source');
-    const { all } = await loadAllSkills(ctx.config);
-    let items = filterBySource(all, source);
+    const { all, personal } = await loadAllSkills(ctx.config);
+    const dirtySet = await gitDirtySkillIds(ctx.config.paths.personalRoot, personal);
+    let items = filterBySource(all, source).map((s) =>
+      s.source === 'personal'
+        ? { ...s, git: { dirty: dirtySet.has(s.skillId) } }
+        : s,
+    );
+
+    if (c.req.query('gitDirty') === 'true') {
+      items = items.filter((s) => s.git?.dirty);
+    }
 
     if (q) {
       const hits = searchSkillIds(ctx.db, q);
@@ -205,6 +217,63 @@ export function createApp() {
       })
       .filter(Boolean);
     return jsonOk(c, { items });
+  });
+
+  app.get('/git/status', async (c) => {
+    const ctx = c.get('ctx');
+    const data = await getGitStatus(ctx.config.paths.personalRoot);
+    return jsonOk(c, data);
+  });
+
+  app.get('/git/diff', async (c) => {
+    const ctx = c.get('ctx');
+    const path = c.req.query('path')?.trim() || undefined;
+    const data = await getGitDiff(ctx.config.paths.personalRoot, path);
+    return jsonOk(c, data);
+  });
+
+  app.post('/git/commit', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as { message: string; paths?: string[] };
+    const data = await postGitCommit(
+      ctx.config.paths.personalRoot,
+      body.message,
+      body.paths,
+    );
+    return jsonOk(c, data);
+  });
+
+  app.get('/git/log', async (c) => {
+    const ctx = c.get('ctx');
+    const path = c.req.query('path')?.trim() || undefined;
+    const limit = Number(c.req.query('limit') ?? '20');
+    const data = await getGitLog(ctx.config.paths.personalRoot, {
+      path,
+      limit: Number.isFinite(limit) ? limit : 20,
+    });
+    return jsonOk(c, data);
+  });
+
+  app.post('/integrations/sync-agents', async (c) => {
+    const ctx = c.get('ctx');
+    const data = await syncAgents(ctx.config);
+    return jsonOk(c, data);
+  });
+
+  app.get('/integrations/agents-links', async (c) => {
+    const ctx = c.get('ctx');
+    const data = await getAgentsLinks(ctx.config);
+    return jsonOk(c, data);
+  });
+
+  app.post('/open', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as {
+      skillId: string;
+      target: 'folder' | 'editor' | 'terminal';
+    };
+    const data = await openTarget(ctx.config, body);
+    return jsonOk(c, data);
   });
 
   app.post('/index/rebuild', async (c) => {
