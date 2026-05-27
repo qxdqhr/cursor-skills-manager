@@ -1,0 +1,26 @@
+{
+  "name": "cursor-skills-manager",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local web UI to manage ~/.cursor/skills Git repository",
+  "scripts": {
+    "predev": "pnpm --filter @csm/core build",
+    "dev": "pnpm run --parallel dev:api dev:web",
+    "dev:api": "pnpm --filter @csm/api dev",
+    "dev:web": "pnpm --filter @csm/web dev",
+    "build": "pnpm run -r build",
+    "typecheck": "pnpm run -r typecheck",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1"
+  }
+}
