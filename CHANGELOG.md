@@ -8,7 +8,14 @@
 
 ### Added
 
-- （下一步 M6）i18n 与 MVP 验收
+- v0.2 backlog 功能（见 doc/05 §8）
+
+## [1.0.0] - 2026-05-27 — MVP
+
+### Added
+
+- M6：react-i18next 中英切换、浅色/深色主题、localhost 安全约束
+- `pnpm smoke`、`doc/ACCEPTANCE-v0.1.md`、`doc/examples/csm-config.sample.json`
 
 ## [0.0.6] - 2026-05-27
 

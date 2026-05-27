@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "locale": "zh",
+  "theme": "system",
+  "api": {
+    "port": 3847,
+    "token": "REPLACE_WITH_GENERATED_TOKEN_ON_FIRST_API_START"
+  },
+  "paths": {
+    "personalRoot": "~/.cursor/skills",
+    "agentsRoot": "~/.agents/skills",
+    "projectScanGlobs": ["~/project/**/.cursor/skills"],
+    "editor": "code"
+  },
+  "reservedDirNames": ["scripts", ".git", ".csm"]
+}
