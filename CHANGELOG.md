@@ -8,6 +8,7 @@
 
 ### Added
 
+- `apps/desktop`：Electron 壳内嵌 `apps/web` + API sidecar（`pnpm dev:desktop` / `pack:desktop`）
 - v0.2 backlog 功能（见 doc/05 §8）
 
 ## [1.0.0] - 2026-05-27 — MVP

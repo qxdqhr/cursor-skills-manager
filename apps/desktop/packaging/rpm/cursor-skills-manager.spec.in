@@ -1,0 +1,50 @@
+# 原生 rpmbuild 规格：避免 electron-builder 内置旧版 fpm 与 RPM 4.2x 不兼容。
+# @VERSION@ 由 scripts/package-rpm-native.sh 替换。
+
+%global debug_package %{nil}
+
+Name:           cursor-skills-manager
+Version:        @VERSION@
+Release:        1%{?dist}
+Summary:        Cursor Skills Manager 桌面客户端（Electron）
+License:        MIT
+URL:            https://github.com/qxdqhr/cursor-skills-manager
+Source0:        %{name}-%{version}.tar.gz
+BuildArch:      x86_64
+
+%description
+Cursor Skills Manager 桌面版：内嵌 Web UI 与本地 API sidecar，管理 ~/.cursor/skills Git 主库。
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+# 预编译二进制，无编译步骤
+
+%install
+install -d %{buildroot}/opt/CursorSkillsManager
+cp -a . %{buildroot}/opt/CursorSkillsManager/
+if [ -f %{buildroot}/opt/CursorSkillsManager/chrome-sandbox ]; then
+  chmod 4755 %{buildroot}/opt/CursorSkillsManager/chrome-sandbox
+fi
+
+install -d %{buildroot}/usr/share/applications
+cat > %{buildroot}/usr/share/applications/%{name}.desktop <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Cursor Skills Manager
+Comment=Manage ~/.cursor/skills Git repository
+Exec=/opt/CursorSkillsManager/cursor-skills-manager %u
+Icon=%{name}
+Categories=Development;Utility;
+Terminal=false
+EOF
+
+%files
+%defattr(-,root,root,-)
+/opt/CursorSkillsManager
+/usr/share/applications/%{name}.desktop
+
+%changelog
+* Thu May 28 2026 qxdqhr <noreply@local> - @VERSION@-1
+- 初始 Electron 桌面壳（Web + API sidecar）

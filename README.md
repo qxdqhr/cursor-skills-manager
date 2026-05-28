@@ -2,7 +2,7 @@
 
 基于 `~/.cursor/skills` Git 主库的 Skill 管理工具（**MVP v0.1**）。
 
-**技术栈**：Vite + React（Web）· Hono（API）· `packages/core`（共享逻辑）
+**技术栈**：Vite + React（Web）· Hono（API）· Electron（Desktop）· `packages/core`（共享逻辑）
 
 **当前进度**：M0～M6 已完成。验收见 [doc/ACCEPTANCE-v0.1.md](./doc/ACCEPTANCE-v0.1.md)。
 
@@ -32,11 +32,24 @@ pnpm dev               # API :3847 + Web :5173
 - 一键执行 `sync-from-agents-skills.sh`
 - 新建 / 删除个人 skill
 
+## 桌面端
+
+Electron 壳自动连接本地 API，开发模式复用 Vite dev server：
+
+```bash
+pnpm dev:desktop          # API + Web + Electron 窗口
+pnpm pack:desktop         # 打包 linux-unpacked（含 sidecar bundle）
+```
+
+打包产物：`apps/desktop/dist/linux-unpacked/cursor-skills-manager`  
+RPM（openSUSE）：`pnpm --filter @csm/desktop pack:rpm`
+
 ## 开发命令
 
 ```bash
 pnpm dev:api
 pnpm dev:web
+pnpm dev:desktop
 pnpm typecheck
 pnpm test
 pnpm smoke              # 全量自检（API 已启动时含 verify:m2/m4/m5）

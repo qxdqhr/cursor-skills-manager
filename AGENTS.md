@@ -11,6 +11,7 @@
 
 ```bash
 pnpm dev
+pnpm dev:desktop
 pnpm typecheck
 pnpm --filter @csm/core test
 ```

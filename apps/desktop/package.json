@@ -1,0 +1,55 @@
+{
+  "name": "@csm/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron desktop shell for Cursor Skills Manager (web + API sidecar)",
+  "main": "src/main.js",
+  "author": {
+    "name": "qxdqhr",
+    "email": "noreply@local"
+  },
+  "homepage": "https://github.com/qxdqhr/cursor-skills-manager",
+  "scripts": {
+    "dev": "electron .",
+    "start": "electron .",
+    "prepare-bundle": "node scripts/prepare-bundle.mjs",
+    "pack:dir": "pnpm prepare-bundle && electron-builder --dir --linux",
+    "pack:debug": "bash scripts/package-debug.sh",
+    "pack:rpm": "bash scripts/package-rpm-native.sh",
+    "typecheck": "node -e \"process.exit(0)\""
+  },
+  "devDependencies": {
+    "electron": "^36.3.2",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.qhr.cursor-skills-manager.desktop",
+    "productName": "Cursor Skills Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".bundle/api",
+        "to": "api"
+      },
+      {
+        "from": ".bundle/web",
+        "to": "web"
+      }
+    ],
+    "linux": {
+      "target": [
+        "dir"
+      ],
+      "category": "Development",
+      "maintainer": "qxdqhr <noreply@local>",
+      "synopsis": "Cursor Skills Manager 桌面客户端",
+      "executableName": "cursor-skills-manager"
+    }
+  }
+}

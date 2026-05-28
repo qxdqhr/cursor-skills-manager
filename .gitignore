@@ -11,3 +11,5 @@ build/
 coverage/
 .vite/
 *.tsbuildinfo
+apps/desktop/.bundle/
+apps/desktop/dist/
