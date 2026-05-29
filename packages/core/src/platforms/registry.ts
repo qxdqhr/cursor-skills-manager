@@ -1,3 +1,4 @@
+import { existsSync, statSync } from 'node:fs';
 import type { CsmConfig } from '../config.js';
 import { defaultAgentsRoot, expandHome } from '../paths.js';
 import type { AgentsLinkStatus } from '../types.js';
@@ -60,6 +61,20 @@ function builtinDefinition(id: PlatformId, personalRoot: string): PlatformDefini
         publishFrom: 'canonical',
       };
   }
+}
+
+/** Pick first existing skills root (handles opencode skill vs skills). */
+export function resolveEffectiveGlobalRoot(platform: PlatformDefinition): string {
+  const candidates = [platform.globalRoot, ...(platform.alternateRoots ?? [])];
+  for (const root of candidates) {
+    if (!existsSync(root)) continue;
+    try {
+      if (statSync(root).isDirectory()) return root;
+    } catch {
+      /* ignore */
+    }
+  }
+  return platform.globalRoot;
 }
 
 export function defaultPlatformsConfig(_personalRoot?: string): PlatformsConfig {

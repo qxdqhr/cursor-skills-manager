@@ -105,7 +105,11 @@
     "platforms": "Agent platforms",
     "platformsHint": "When enabled, skills list checks symlink bindings under each platform root (read-only in M7).",
     "platformEnabled": "Enabled",
-    "platformRoot": "Global root"
+    "platformRoot": "Global root",
+    "platformAltRoots": "Alternate roots",
+    "cliInstalled": "CLI installed: {{path}}",
+    "cliMissing": "CLI not detected (optional)",
+    "platformDocs": "Official docs →"
   },
   "platforms": {
     "cursor": "Cursor (canonical)",

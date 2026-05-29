@@ -7,7 +7,7 @@ import {
   publishSkillBatch,
   repairSkillBatch,
   syncPlatformsBatch,
-  resolvePlatformSummaries,
+  resolvePlatformSummariesWithProbe,
   enrichPersonalSkillsWithBindings,
 } from '@csm/core';
 import { ApiError } from '../errors.js';
@@ -53,8 +53,9 @@ async function refreshBindings(config: CsmConfig, skills: SkillSummary[]): Promi
   await enrichPersonalSkillsWithBindings(config, skills);
 }
 
-export function listPlatforms(config: CsmConfig) {
-  return { items: resolvePlatformSummaries(config) };
+export async function listPlatforms(config: CsmConfig) {
+  const items = await resolvePlatformSummariesWithProbe(config);
+  return { items };
 }
 
 export async function listPlatformBindings(config: CsmConfig, platformId: string) {

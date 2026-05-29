@@ -23,6 +23,8 @@ export interface PlatformDefinition {
   enabled: boolean;
   publishFrom?: 'canonical';
   alternateRoots?: string[];
+  cliInstalled?: boolean;
+  cliPath?: string;
 }
 
 export interface PlatformsConfig {

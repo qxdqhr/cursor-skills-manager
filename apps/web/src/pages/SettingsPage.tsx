@@ -14,6 +14,14 @@ const PLATFORM_I18N: Record<PlatformId, string> = {
   codex: 'platforms.codex',
 };
 
+const PLATFORM_DOC_URLS: Record<PlatformId, string> = {
+  cursor: 'https://cursor.com/docs/context/skills',
+  agents: 'https://skills.sh/',
+  opencode: 'https://opencode.ai/docs/skills',
+  claude: 'https://docs.anthropic.com/en/docs/claude-code/skills',
+  codex: 'https://cursor.com/docs/codex',
+};
+
 export function SettingsPage({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const { locale, theme, setLocale, setTheme } = useAppPreferences();
@@ -164,6 +172,24 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
                     <p className={cn(ui.muted, 'mt-1 break-all font-mono text-[11px]')}>
                       {t('settings.platformRoot')}: {platform.globalRoot}
                     </p>
+                    {platform.alternateRoots?.length ? (
+                      <p className={cn(ui.muted, 'mt-0.5 break-all font-mono text-[10px]')}>
+                        {t('settings.platformAltRoots')}: {platform.alternateRoots.join(', ')}
+                      </p>
+                    ) : null}
+                    <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                      {platform.cliInstalled
+                        ? t('settings.cliInstalled', { path: platform.cliPath ?? '—' })
+                        : t('settings.cliMissing')}
+                    </p>
+                    <a
+                      href={PLATFORM_DOC_URLS[platform.id]}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 inline-block text-xs text-emerald-600 hover:underline dark:text-emerald-400"
+                    >
+                      {t('settings.platformDocs')}
+                    </a>
                   </div>
                   <label className="flex shrink-0 items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
                     <input

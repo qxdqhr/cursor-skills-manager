@@ -279,9 +279,10 @@ export function createApp() {
     return jsonOk(c, data);
   });
 
-  app.get('/platforms', (c) => {
+  app.get('/platforms', async (c) => {
     const ctx = c.get('ctx');
-    return jsonOk(c, listPlatforms(ctx.config));
+    const data = await listPlatforms(ctx.config);
+    return jsonOk(c, data);
   });
 
   app.get('/platforms/:platformId/bindings', async (c) => {
@@ -326,7 +327,7 @@ export function createApp() {
   app.post('/integrations/sync-platforms', async (c) => {
     const ctx = c.get('ctx');
     const body = (await c.req.json()) as {
-      platformIds?: string[];
+      platformIds?: import('@csm/core').PlatformId[];
       skillIds?: string[];
       all?: boolean;
       dryRun?: boolean;

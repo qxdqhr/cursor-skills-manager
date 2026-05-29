@@ -4,6 +4,7 @@ import { join, resolve } from 'node:path';
 import type { CsmConfig } from '../config.js';
 import type { SkillSummary } from '../types.js';
 import { checkPlatformBinding } from './checkBinding.js';
+import { resolveEffectiveGlobalRoot } from './registry.js';
 import { getPlatformById, resolvePlatforms } from './registry.js';
 import type { BindingIssue, PlatformDefinition, PlatformId } from './types.js';
 
@@ -48,7 +49,7 @@ function canonicalDir(personalRoot: string, relativePath: string): string {
 }
 
 function linkPathFor(platform: PlatformDefinition, skillName: string): string {
-  return join(platform.globalRoot, skillName);
+  return join(resolveEffectiveGlobalRoot(platform), skillName);
 }
 
 function assertPublishablePlatform(platform: PlatformDefinition): void {
@@ -204,7 +205,7 @@ export async function publishSkillBinding(
     };
   }
 
-  await mkdir(platform.globalRoot, { recursive: true });
+  await mkdir(resolveEffectiveGlobalRoot(platform), { recursive: true });
   await symlink(target, linkPath);
 
   const action: PublishAction =
@@ -272,7 +273,7 @@ export async function unpublishSkillBinding(
     };
   }
 
-  const currentTarget = resolve(platform.globalRoot, await readlink(linkPath));
+  const currentTarget = resolve(resolveEffectiveGlobalRoot(platform), await readlink(linkPath));
   await unlink(linkPath);
 
   return {

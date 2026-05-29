@@ -34,4 +34,5 @@ export interface PlatformsConfig {
 
 export type PlatformSummary = PlatformDefinition & {
   cliInstalled?: boolean;
+  cliPath?: string;
 };

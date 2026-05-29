@@ -2,6 +2,7 @@ import { lstat, readlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import type { PlatformBindingStatus, PlatformDefinition } from './types.js';
+import { resolveEffectiveGlobalRoot } from './registry.js';
 
 export type SkillBindingInput = {
   name: string;
@@ -19,6 +20,7 @@ export async function checkPlatformBinding(
   platform: PlatformDefinition,
 ): Promise<PlatformBindingStatus> {
   const canonicalDir = canonicalSkillDir(personalRoot, skill.relativePath);
+  const globalRoot = resolveEffectiveGlobalRoot(platform);
 
   if (platform.role === 'canonical' || platform.syncMode === 'none') {
     const exists = existsSync(canonicalDir);
@@ -33,7 +35,7 @@ export async function checkPlatformBinding(
     };
   }
 
-  const linkPath = join(platform.globalRoot, skill.name);
+  const linkPath = join(globalRoot, skill.name);
   const expected = canonicalDir;
 
   if (!existsSync(linkPath)) {
@@ -63,7 +65,7 @@ export async function checkPlatformBinding(
         };
       }
       const target = await readlink(linkPath);
-      const resolved = resolve(platform.globalRoot, target);
+      const resolved = resolve(globalRoot, target);
       const ok = resolved === expected;
       return {
         platformId: platform.id,

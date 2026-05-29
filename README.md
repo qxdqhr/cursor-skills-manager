@@ -1,10 +1,10 @@
 # Cursor Skills Manager
 
-基于 `~/.cursor/skills` Git 主库的 Skill 管理工具（**MVP v0.1**）。
+基于 `~/.cursor/skills` Git 主库的 Skill 管理工具（**v0.3 多 Agent 统一**）。
 
 **技术栈**：Vite + React（Web）· Hono（API）· Electron（Desktop）· `packages/core`（共享逻辑）
 
-**当前进度**：M0～M6 已完成。验收见 [doc/ACCEPTANCE-v0.1.md](./doc/ACCEPTANCE-v0.1.md)。
+**当前进度**：M0～M9 已完成（v0.3）。验收见 [doc/ACCEPTANCE-v0.3.md](./doc/ACCEPTANCE-v0.3.md)；MVP 见 [doc/ACCEPTANCE-v0.1.md](./doc/ACCEPTANCE-v0.1.md)。
 
 ## 快速开始
 
@@ -29,8 +29,19 @@ pnpm dev               # API :3847 + Web :5173
 - 浏览 / 搜索个人主库与项目 skill（项目只读）
 - 双栏编辑 SKILL.md（校验 + 预览）
 - Git 变更、diff、commit
-- 一键执行 `sync-from-agents-skills.sh`
+- **多平台 binding 检查**（Cursor / agents / OpenCode / Claude / Codex）
+- **一键 publish / repair** symlink 到各 Agent 平台目录
 - 新建 / 删除个人 skill
+
+### 多平台发布（v0.3）
+
+1. **设置 → Agent 平台**：启用目标平台，查看 CLI 探测与 globalRoot
+2. 顶栏 **发布到平台**：多选平台，可先 **预览**（dry-run）
+3. 详情页可对单个 skill **发布 / 修复** binding
+
+主库仍为唯一 Git 真相源；各平台目录为 symlink 发布目标。
+
+> 旧版 `sync-from-agents-skills.sh` 仍可通过 `POST /integrations/sync-agents` 调用；推荐 `POST /integrations/sync-platforms`。
 
 ## 桌面端
 
@@ -52,9 +63,11 @@ pnpm dev:web
 pnpm dev:desktop
 pnpm typecheck
 pnpm test
-pnpm smoke              # 全量自检（API 已启动时含 verify:m2/m4/m5）
+pnpm smoke              # 全量自检（API 已启动时含 verify:m2～m9）
 pnpm verify:m1          # 扫描主库
-pnpm verify:m2          # API 列表/搜索（需 API）
+pnpm verify:m7          # 平台 registry + bindings（需 API）
+pnpm verify:m8          # publish/repair（需 API）
+pnpm verify:m9          # CLI 探测字段（需 API）
 ```
 
 ### API 鉴权
@@ -80,7 +93,8 @@ curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:3847/api/v1/skills | 
 | 文件 | 说明 |
 |------|------|
 | [doc/00-开发进度.md](./doc/00-开发进度.md) | 里程碑与自测 |
-| [doc/ACCEPTANCE-v0.1.md](./doc/ACCEPTANCE-v0.1.md) | MVP 验收 AC-01～10 |
+| [doc/ACCEPTANCE-v0.3.md](./doc/ACCEPTANCE-v0.3.md) | v0.3 多 Agent 验收 AC-11～20 |
+| [doc/02-多Agent工具统一架构方案.md](./doc/02-多Agent工具统一架构方案.md) | Hub + Bindings 架构 |
 | [doc/01-cursor-skills-manager-需求文档.md](./doc/01-cursor-skills-manager-需求文档.md) | 产品需求 |
 | [CHANGELOG.md](./CHANGELOG.md) | 版本历史 |
 

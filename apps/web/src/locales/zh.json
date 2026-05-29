@@ -105,7 +105,11 @@
     "platforms": "Agent 平台",
     "platformsHint": "启用后会在 skill 列表检查对应目录下的 symlink 绑定（M7 只读，发布见后续版本）。",
     "platformEnabled": "启用",
-    "platformRoot": "全局目录"
+    "platformRoot": "全局目录",
+    "platformAltRoots": "备用目录",
+    "cliInstalled": "CLI 已安装：{{path}}",
+    "cliMissing": "CLI 未检测到（可选）",
+    "platformDocs": "官方文档 →"
   },
   "platforms": {
     "cursor": "Cursor（主库）",

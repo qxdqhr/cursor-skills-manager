@@ -6,38 +6,20 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-29 — 多 Agent 统一
+
 ### Added
 
-- **M8**：`platforms/publish.ts`（publish/repair/unpublish symlink）、`POST /platforms/:id/publish|repair`、`POST /integrations/sync-platforms`
-- **M8**：顶栏「发布到平台」Modal（多选平台、预览 dry-run、force 冲突）；详情页单 skill 发布/修复
-- **M8**：`scripts/verify-m8.mjs`、`pnpm verify:m7` / `pnpm verify:m8`
-- **M7**：多 Agent 平台注册表（cursor/agents/opencode/claude/codex）、`config.json` v2 自动迁移
-- **M7**：`checkPlatformBinding` / `SkillSummary.bindings[]` + SQLite `platform_bindings` 索引
-- **M7**：`GET /platforms`、`GET /platforms/:id/bindings`；`GET /skills?platform=&bindingIssue=`
-- **M7**：设置页平台开关与 globalRoot 展示；列表/详情 platform binding badges；「平台绑定异常」筛选
-- **M7**：`scripts/verify-m7.mjs`；core 单测（registry、checkBinding、config v2 迁移）
-- Web 三栏布局：浏览/列表/详情均可折叠、拖拽调宽，宽度持久化到 localStorage
-- 左侧「浏览与筛选」面板：分类树 + 多维快捷筛选（未提交、校验失败、scripts、agents 异常）
-- 列表区活跃筛选 chips，可逐项清除
-- 分类树按**文件夹路径**分组（不再把 skill 名称当作分类节点）；根目录 skill 归入「未分类」
-- 个人主库 / 项目分类区块及子文件夹均可折叠，折叠状态持久化
-
-### Fixed
-
-- 在线编辑器页：补全语言/主题切换（`HeaderPreferences`）；Frontmatter、预览、CodeMirror、文件列表改为跟随浅色/深色主题，不再写死深色样式
-- Linux「打开目录/编辑器」：从 plasmashell/kwin 读取真实 `XAUTHORITY`；Linux 不再调用 `xdg-open`/`kde-open`（KDE 优先 `dolphin`，否则 `gio`）；API dev 监听 `@csm/core/dist` 变更并自动重启
+- **M9**：`platforms/probe.ts` CLI 探测；`GET /platforms` 返回 `cliInstalled` / `cliPath`
+- **M9**：设置页 CLI 状态 + 官方文档链接；`resolveEffectiveGlobalRoot`（OpenCode alternateRoots）
+- **M9**：`doc/ACCEPTANCE-v0.3.md`、`pnpm verify:m9`；smoke 扩展 m7/m8/m9
+- **M8**：`platforms/publish.ts`、publish/repair/sync-platforms API、Web 发布 UI
+- **M7**：Platform Registry、config v2、binding 检查与索引
 
 ### Changed
 
-- 主页面三栏布局：最多同时收起 2 个面板（至少保留 1 个展开）；超出时折叠按钮禁用并提示
-- 主页面三栏布局：展开的列自动均分填满宽度，收起列仅占窄条，不再留下右侧空白
-- 主页面三栏收起/展开箭头：三栏统一为「收起时 ←、展开时 →」
-- 主页面 Git：由右侧折叠侧栏改为居中弹窗（与 Sync Agents 一致）；点击顶栏 Git 打开，Esc / 点击遮罩 / 关闭按钮可退出
-- 顶栏仅保留全文搜索；来源筛选改由分类树隐式推导，移除冗余下拉框
-- Web 样式移除 `@layer components` 自定义类（`.csm-*`），统一为 `lib/ui.ts` Tailwind 工具类常量 + 组件内 `className`
-
-- `apps/desktop`：Electron 壳内嵌 `apps/web` + API sidecar（`pnpm dev:desktop` / `pack:desktop`）
-- v0.2 backlog 功能（见 doc/05 §8）
+- 顶栏「同步 agents」→「发布到平台」；`agentsLink` 字段 deprecated，以 `bindings[]` 为准
+- README 增加多平台发布说明
 
 ## [1.0.0] - 2026-05-27 — MVP
 
