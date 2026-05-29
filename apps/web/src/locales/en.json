@@ -29,6 +29,28 @@
     "sourceProject": "Project (read-only)",
     "gitDirtyOnly": "Uncommitted only"
   },
+  "layout": {
+    "browse": "Browse & filters",
+    "browseShort": "Browse",
+    "list": "Skill list",
+    "listShort": "List",
+    "detail": "Details",
+    "detailShort": "Details",
+    "expandPanel": "Expand {{panel}}",
+    "collapsePanel": "Collapse {{panel}}",
+    "resizePanel": "Resize {{panel}}"
+  },
+  "filters": {
+    "quickTitle": "Quick filters",
+    "categoryTitle": "Categories",
+    "clearAll": "Clear",
+    "gitDirtyOnly": "Uncommitted",
+    "invalidOnly": "Invalid",
+    "scriptsOnly": "Has scripts",
+    "agentsIssueOnly": "Agents issue",
+    "searchChip": "Search: {{q}}",
+    "categoryChip": "Category: {{path}}"
+  },
   "skills": {
     "loading": "Loading…",
     "empty": "No matching skills",

@@ -47,7 +47,7 @@ export function SkillList({
           <button
             type="button"
             onClick={() => onSelect(skill)}
-            className={`w-full px-4 py-3 text-left transition-colors ${
+            className={`w-full px-4 py-3 text-left transition-colors active:scale-[0.995] ${
               selectedId === skill.skillId
                 ? 'bg-emerald-100 dark:bg-emerald-950/50'
                 : 'hover:bg-zinc-100 dark:hover:bg-zinc-900/80'

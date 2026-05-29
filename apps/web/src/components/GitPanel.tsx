@@ -87,7 +87,7 @@ export function GitPanel({
   if (!open) return null;
 
   return (
-    <aside className="flex w-96 shrink-0 flex-col border-l border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
+    <aside className="flex w-96 shrink-0 flex-col bg-zinc-50 shadow-[-1px_0_0_rgba(0,0,0,0.06)] dark:bg-zinc-950 dark:shadow-[-1px_0_0_rgba(255,255,255,0.06)]">
       <div className="csm-border flex items-center justify-between border-b px-3 py-2">
         <div>
           <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t('git.title')}</h2>

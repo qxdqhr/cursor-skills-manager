@@ -8,6 +8,14 @@
 
 ### Added
 
+- Web 三栏布局：浏览/列表/详情均可折叠、拖拽调宽，宽度持久化到 localStorage
+- 左侧「浏览与筛选」面板：分类树 + 多维快捷筛选（未提交、校验失败、scripts、agents 异常）
+- 列表区活跃筛选 chips，可逐项清除
+
+### Changed
+
+- 顶栏仅保留全文搜索；来源筛选改由分类树隐式推导，移除冗余下拉框
+
 - `apps/desktop`：Electron 壳内嵌 `apps/web` + API sidecar（`pnpm dev:desktop` / `pack:desktop`）
 - v0.2 backlog 功能（见 doc/05 §8）
 

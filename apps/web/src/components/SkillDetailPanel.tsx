@@ -13,14 +13,14 @@ export function SkillDetailPanel({
 
   if (!skill) {
     return (
-      <div className="csm-muted flex h-full items-center justify-center border-l border-zinc-200 p-6 text-sm dark:border-zinc-800">
+      <div className="csm-muted flex h-full items-center justify-center p-6 text-sm text-wrap-pretty">
         {t('skills.selectHint')}
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col border-l border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="flex h-full flex-col p-4">
       <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">{skill.name}</h2>
       <p className="csm-muted mt-1 font-mono text-xs">{skill.skillId}</p>
       {skill.readOnly && (
@@ -30,7 +30,11 @@ export function SkillDetailPanel({
       )}
       <div className="mt-4 flex flex-col gap-2">
         {!skill.readOnly && skill.source === 'personal' && onEdit && (
-          <button type="button" onClick={() => onEdit(skill.skillId)} className="csm-btn-primary w-full">
+          <button
+            type="button"
+            onClick={() => onEdit(skill.skillId)}
+            className="csm-btn-primary w-full transition-transform active:scale-[0.96]"
+          >
             {t('skills.openEditor')}
           </button>
         )}

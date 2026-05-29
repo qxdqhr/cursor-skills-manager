@@ -18,11 +18,11 @@ body {
   }
 
   .csm-header {
-    @apply flex shrink-0 items-center gap-4 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800;
+    @apply flex shrink-0 items-center gap-4 border-b border-zinc-200 px-4 py-3 shadow-[inset_0_-1px_0_rgba(0,0,0,0.04)] dark:border-zinc-800 dark:shadow-[inset_0_-1px_0_rgba(255,255,255,0.04)];
   }
 
-  .csm-aside {
-    @apply w-56 shrink-0 overflow-y-auto border-r border-zinc-200 p-3 dark:border-zinc-800;
+  .csm-btn {
+    @apply rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)] transition-[transform,background-color,color] hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] dark:hover:bg-zinc-800;
   }
 
   .csm-panel {
@@ -31,10 +31,6 @@ body {
 
   .csm-input {
     @apply border border-zinc-300 bg-white text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100;
-  }
-
-  .csm-btn {
-    @apply rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800;
   }
 
   .csm-btn-primary {

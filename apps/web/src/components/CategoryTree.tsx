@@ -26,10 +26,10 @@ function TreeNodes({
             <button
               type="button"
               onClick={() => onPick(path)}
-              className="w-full rounded px-2 py-1 text-left text-sm text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+              className="w-full rounded-md px-2 py-1.5 text-left text-sm text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-zinc-900 active:scale-[0.98] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             >
               <span className="text-zinc-800 dark:text-zinc-300">{node.label}</span>
-              <span className="csm-muted ml-1 text-xs">({node.skillCount})</span>
+              <span className="csm-muted ml-1 text-xs tabular-nums">({node.skillCount})</span>
             </button>
             {node.children.length > 0 && (
               <TreeNodes nodes={node.children} depth={depth + 1} prefix={path} onPick={onPick} />
@@ -71,7 +71,7 @@ export function CategoryTree({
       <button
         type="button"
         onClick={() => onSelect({ type: 'all' })}
-        className={`w-full rounded px-2 py-1.5 text-left ${
+        className={`w-full rounded-md px-2 py-1.5 text-left transition-colors active:scale-[0.98] ${
           selection.type === 'all' ? activeCls : idleCls
         }`}
       >
@@ -85,7 +85,7 @@ export function CategoryTree({
         <button
           type="button"
           onClick={() => onSelect({ type: 'personal', categoryPath: '' })}
-          className={`mb-1 w-full rounded px-2 py-1 text-left text-xs ${
+          className={`mb-1 w-full rounded-md px-2 py-1 text-left text-xs transition-colors active:scale-[0.98] ${
             personalActive === '' ? activeCls : idleCls
           }`}
         >
@@ -110,7 +110,7 @@ export function CategoryTree({
           <button
             type="button"
             onClick={() => onSelect({ type: 'project', workspaceId: ws.workspaceId, categoryPath: '' })}
-            className={`mb-1 w-full rounded px-2 py-1 text-left text-xs ${
+            className={`mb-1 w-full rounded-md px-2 py-1 text-left text-xs transition-colors active:scale-[0.98] ${
               projectActive?.ws === ws.workspaceId && projectActive.path === ''
                 ? activeCls
                 : idleCls
