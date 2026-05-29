@@ -15,6 +15,7 @@
 ### Changed
 
 - 顶栏仅保留全文搜索；来源筛选改由分类树隐式推导，移除冗余下拉框
+- Web 样式移除 `@layer components` 自定义类（`.csm-*`），统一为 `lib/ui.ts` Tailwind 工具类常量 + 组件内 `className`
 
 - `apps/desktop`：Electron 壳内嵌 `apps/web` + API sidecar（`pnpm dev:desktop` / `pack:desktop`）
 - v0.2 backlog 功能（见 doc/05 §8）

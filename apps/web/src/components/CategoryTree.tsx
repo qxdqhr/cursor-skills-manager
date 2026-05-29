@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { cn, ui } from '../lib/ui.js';
 import type { SkillTreeNode, SkillsTree } from '../types.js';
 
 export type TreeSelection =
@@ -18,7 +19,7 @@ function TreeNodes({
   onPick: (path: string) => void;
 }) {
   return (
-    <ul className={depth > 0 ? 'csm-border ml-2 border-l pl-2' : ''}>
+    <ul className={depth > 0 ? cn(ui.border, 'ml-2 border-l pl-2') : ''}>
       {nodes.map((node) => {
         const path = prefix ? `${prefix}/${node.id}` : node.id;
         return (
@@ -29,7 +30,7 @@ function TreeNodes({
               className="w-full rounded-md px-2 py-1.5 text-left text-sm text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-zinc-900 active:scale-[0.98] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             >
               <span className="text-zinc-800 dark:text-zinc-300">{node.label}</span>
-              <span className="csm-muted ml-1 text-xs tabular-nums">({node.skillCount})</span>
+              <span className={cn(ui.muted, 'ml-1 text-xs tabular-nums')}>({node.skillCount})</span>
             </button>
             {node.children.length > 0 && (
               <TreeNodes nodes={node.children} depth={depth + 1} prefix={path} onPick={onPick} />
@@ -53,7 +54,7 @@ export function CategoryTree({
   const { t } = useTranslation();
 
   if (!tree) {
-    return <p className="csm-muted text-sm">{t('tree.loading')}</p>;
+    return <p className={cn(ui.muted, 'text-sm')}>{t('tree.loading')}</p>;
   }
 
   const personalActive = selection.type === 'personal' ? selection.categoryPath : null;
@@ -79,7 +80,7 @@ export function CategoryTree({
       </button>
 
       <div>
-        <p className="csm-muted mb-1 px-2 text-xs font-medium uppercase tracking-wider">
+        <p className={cn(ui.muted, 'mb-1 px-2 text-xs font-medium uppercase tracking-wider')}>
           {t('tree.personal')}
         </p>
         <button
@@ -102,7 +103,7 @@ export function CategoryTree({
       {tree.project.map((ws) => (
         <div key={ws.workspaceId}>
           <p
-            className="csm-muted mb-1 truncate px-2 text-xs font-medium uppercase tracking-wider"
+            className={cn(ui.muted, 'mb-1 truncate px-2 text-xs font-medium uppercase tracking-wider')}
             title={ws.workspacePath}
           >
             {ws.workspaceId}

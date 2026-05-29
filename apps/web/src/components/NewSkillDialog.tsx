@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiClientError, postSkill } from '../lib/api.js';
+import { cn, ui } from '../lib/ui.js';
 
 type Props = {
   open: boolean;
@@ -46,37 +47,41 @@ export function NewSkillDialog({ open, onClose, onCreated }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <form onSubmit={handleSubmit} className="csm-panel w-full max-w-md p-6 shadow-xl">
+      <form onSubmit={handleSubmit} className={cn(ui.panel, 'w-full max-w-md p-6 shadow-xl')}>
         <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">{t('newSkill.title')}</h2>
-        <p className="csm-muted mt-1 text-xs">{t('newSkill.hint')}</p>
+        <p className={cn(ui.muted, 'mt-1 text-xs')}>{t('newSkill.hint')}</p>
         <div className="mt-4 space-y-3">
           <div>
-            <label className="csm-muted text-xs">{t('newSkill.name')}</label>
+            <label className={cn(ui.muted, 'text-xs')}>{t('newSkill.name')}</label>
             <input
               required
               pattern="[a-z0-9-]+"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="my-new-skill"
-              className="csm-input mt-1 w-full rounded-lg px-3 py-2 font-mono text-sm"
+              className={cn(ui.input, 'mt-1 w-full rounded-lg px-3 py-2 font-mono text-sm')}
             />
           </div>
           <div>
-            <label className="csm-muted text-xs">{t('newSkill.category')}</label>
+            <label className={cn(ui.muted, 'text-xs')}>{t('newSkill.category')}</label>
             <input
               value={categoryPath}
               onChange={(e) => setCategoryPath(e.target.value)}
               placeholder="experiments"
-              className="csm-input mt-1 w-full rounded-lg px-3 py-2 font-mono text-sm"
+              className={cn(ui.input, 'mt-1 w-full rounded-lg px-3 py-2 font-mono text-sm')}
             />
           </div>
         </div>
         {error && <p className="mt-3 text-sm text-red-500 dark:text-red-400">{error}</p>}
         <div className="mt-6 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="csm-muted text-sm hover:text-zinc-800 dark:hover:text-zinc-200">
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn(ui.muted, 'text-sm hover:text-zinc-800 dark:hover:text-zinc-200')}
+          >
             {t('newSkill.cancel')}
           </button>
-          <button type="submit" disabled={saving || !name.trim()} className="csm-btn-primary disabled:opacity-50">
+          <button type="submit" disabled={saving || !name.trim()} className={cn(ui.btnPrimary, 'disabled:opacity-50')}>
             {saving ? t('newSkill.creating') : t('newSkill.create')}
           </button>
         </div>

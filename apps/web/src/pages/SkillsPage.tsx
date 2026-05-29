@@ -20,6 +20,7 @@ import { SyncAgentsModal } from '../components/SyncAgentsModal.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { ApiClientError, fetchSkills, fetchSkillsTree } from '../lib/api.js';
 import { getStoredToken } from '../lib/token.js';
+import { cn, ui } from '../lib/ui.js';
 import type { SkillSummary, SkillsTree } from '../types.js';
 
 function matchesTree(skill: SkillSummary, sel: TreeSelection): boolean {
@@ -142,18 +143,20 @@ export function SkillsPage({
             <button
               type="button"
               onClick={() => setSyncOpen(true)}
-              className="csm-btn transition-transform active:scale-[0.96]"
+              className={cn(ui.btn, 'transition-transform active:scale-[0.96]')}
             >
               {t('nav.syncAgents')}
             </button>
             <button
               type="button"
               onClick={() => setGitOpen((o) => !o)}
-              className={`csm-btn transition-transform active:scale-[0.96] ${
+              className={cn(
+                ui.btn,
+                'transition-transform active:scale-[0.96]',
                 gitOpen
                   ? 'border-emerald-600 bg-emerald-100 text-emerald-800 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.25)] dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                  : ''
-              }`}
+                  : '',
+              )}
             >
               {t('nav.git')}
             </button>
@@ -172,7 +175,7 @@ export function SkillsPage({
         listHeader={
           <div className="border-b border-zinc-200/80 px-3 py-2 shadow-[inset_0_-1px_0_rgba(0,0,0,0.04)] dark:border-zinc-800/80 dark:shadow-[inset_0_-1px_0_rgba(255,255,255,0.04)]">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span className="csm-muted tabular-nums">
+              <span className={cn(ui.muted, 'tabular-nums')}>
                 {loading
                   ? t('skills.loading')
                   : t('skills.count', { filtered: filtered.length, total: items.length })}

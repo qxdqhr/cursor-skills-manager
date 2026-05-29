@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { ApiClientError, postOpenTarget } from '../lib/api.js';
+import { cn, ui } from '../lib/ui.js';
 import type { SkillSummary } from '../types.js';
 
 export function SkillDetailPanel({
@@ -13,7 +14,7 @@ export function SkillDetailPanel({
 
   if (!skill) {
     return (
-      <div className="csm-muted flex h-full items-center justify-center p-6 text-sm text-wrap-pretty">
+      <div className={cn(ui.muted, 'flex h-full items-center justify-center p-6 text-sm text-wrap-pretty')}>
         {t('skills.selectHint')}
       </div>
     );
@@ -22,7 +23,7 @@ export function SkillDetailPanel({
   return (
     <div className="flex h-full flex-col p-4">
       <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">{skill.name}</h2>
-      <p className="csm-muted mt-1 font-mono text-xs">{skill.skillId}</p>
+      <p className={cn(ui.muted, 'mt-1 font-mono text-xs')}>{skill.skillId}</p>
       {skill.readOnly && (
         <p className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
           {t('skills.projectReadOnlyHint')}
@@ -33,7 +34,7 @@ export function SkillDetailPanel({
           <button
             type="button"
             onClick={() => onEdit(skill.skillId)}
-            className="csm-btn-primary w-full transition-transform active:scale-[0.96]"
+            className={cn(ui.btnPrimary, 'w-full transition-transform active:scale-[0.96]')}
           >
             {t('skills.openEditor')}
           </button>
@@ -47,7 +48,7 @@ export function SkillDetailPanel({
                   alert(e instanceof ApiClientError ? e.message : t('common.loadFailed')),
                 )
               }
-              className="csm-btn flex-1 text-xs"
+              className={cn(ui.btn, 'flex-1 text-xs')}
             >
               {t('skills.openFolder')}
             </button>
@@ -58,7 +59,7 @@ export function SkillDetailPanel({
                   alert(e instanceof ApiClientError ? e.message : t('common.loadFailed')),
                 )
               }
-              className="csm-btn flex-1 text-xs"
+              className={cn(ui.btn, 'flex-1 text-xs')}
             >
               {t('skills.openInEditor')}
             </button>
@@ -87,7 +88,7 @@ export function SkillDetailPanel({
 function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <dt className="csm-muted">{label}</dt>
+      <dt className={ui.muted}>{label}</dt>
       <dd className={`mt-0.5 ${mono ? 'break-all font-mono text-xs text-zinc-600 dark:text-zinc-400' : 'text-zinc-800 dark:text-zinc-300'}`}>
         {value}
       </dd>

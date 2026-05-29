@@ -5,6 +5,7 @@ import { SettingsPage } from './pages/SettingsPage.js';
 import { SkillEditorPage } from './pages/SkillEditorPage.js';
 import { fetchHealth } from './lib/api.js';
 import { getStoredToken } from './lib/token.js';
+import { cn, ui } from './lib/ui.js';
 
 type View = 'skills' | 'settings';
 
@@ -25,7 +26,7 @@ export default function App() {
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-6 text-center dark:bg-zinc-950">
         <div>
           <p className="text-red-500 dark:text-red-400">{t('api.unreachable')}</p>
-          <p className="csm-muted mt-2 text-sm">{t('api.startHint')}</p>
+          <p className={cn(ui.muted, 'mt-2 text-sm')}>{t('api.startHint')}</p>
         </div>
       </div>
     );
@@ -33,7 +34,7 @@ export default function App() {
 
   if (apiOk === null) {
     return (
-      <div className="csm-muted flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div className={cn(ui.muted, 'flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950')}>
         {t('api.connecting')}
       </div>
     );
@@ -43,7 +44,7 @@ export default function App() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-50 p-6 dark:bg-zinc-950">
         <p className="text-zinc-700 dark:text-zinc-300">{t('settings.firstUseToken')}</p>
-        <button type="button" onClick={() => setView('settings')} className="csm-btn-primary">
+        <button type="button" onClick={() => setView('settings')} className={ui.btnPrimary}>
           {t('settings.openSettings')}
         </button>
       </div>

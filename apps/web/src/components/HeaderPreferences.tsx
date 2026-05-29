@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAppPreferences } from '../context/AppPreferences.js';
+import { cn, ui } from '../lib/ui.js';
 import type { AppLocale } from '../i18n/index.js';
 import type { ThemeMode } from '../lib/theme.js';
 
@@ -12,7 +13,7 @@ export function HeaderPreferences() {
       <select
         value={locale}
         onChange={(e) => void setLocale(e.target.value as AppLocale)}
-        className="csm-input rounded-lg px-2 py-1.5 text-sm"
+        className={cn(ui.input, 'rounded-lg px-2 py-1.5 text-sm')}
         aria-label={t('settings.locale')}
       >
         <option value="zh">{t('locale.zh')}</option>
@@ -21,7 +22,7 @@ export function HeaderPreferences() {
       <select
         value={theme}
         onChange={(e) => void setTheme(e.target.value as ThemeMode)}
-        className="csm-input rounded-lg px-2 py-1.5 text-sm"
+        className={cn(ui.input, 'rounded-lg px-2 py-1.5 text-sm')}
         aria-label={t('settings.theme')}
       >
         <option value="light">{t('theme.light')}</option>

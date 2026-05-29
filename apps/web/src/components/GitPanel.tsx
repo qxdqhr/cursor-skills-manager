@@ -8,6 +8,7 @@ import {
   postGitCommit,
 } from '../lib/api.js';
 import type { GitLogEntry } from '../lib/api.js';
+import { cn, ui } from '../lib/ui.js';
 
 export function GitPanel({
   open,
@@ -88,11 +89,11 @@ export function GitPanel({
 
   return (
     <aside className="flex w-96 shrink-0 flex-col bg-zinc-50 shadow-[-1px_0_0_rgba(0,0,0,0.06)] dark:bg-zinc-950 dark:shadow-[-1px_0_0_rgba(255,255,255,0.06)]">
-      <div className="csm-border flex items-center justify-between border-b px-3 py-2">
+      <div className={cn(ui.border, 'flex items-center justify-between border-b px-3 py-2')}>
         <div>
           <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t('git.title')}</h2>
           {status && (
-            <p className="csm-muted text-xs">
+            <p className={cn(ui.muted, 'text-xs')}>
               {status.branch} ·{' '}
               {status.clean
                 ? t('git.clean')
@@ -100,27 +101,27 @@ export function GitPanel({
             </p>
           )}
         </div>
-        <button type="button" onClick={onClose} className="csm-muted text-xs hover:text-zinc-800 dark:hover:text-zinc-300">
+        <button type="button" onClick={onClose} className={cn(ui.muted, 'text-xs hover:text-zinc-800 dark:hover:text-zinc-300')}>
           {t('nav.close')}
         </button>
       </div>
 
-      <div className="csm-border flex border-b text-xs">
+      <div className={cn(ui.border, 'flex border-b text-xs')}>
         <button
           type="button"
           onClick={() => setTab('changes')}
-          className={`flex-1 py-2 ${tab === 'changes' ? 'text-emerald-600 dark:text-emerald-400' : 'csm-muted'}`}
+          className={`flex-1 py-2 ${tab === 'changes' ? 'text-emerald-600 dark:text-emerald-400' : ui.muted}`}
         >
           {t('git.tabChanges')}
         </button>
         <button
           type="button"
           onClick={() => setTab('log')}
-          className={`flex-1 py-2 ${tab === 'log' ? 'text-emerald-600 dark:text-emerald-400' : 'csm-muted'}`}
+          className={`flex-1 py-2 ${tab === 'log' ? 'text-emerald-600 dark:text-emerald-400' : ui.muted}`}
         >
           {t('git.tabLog')}
         </button>
-        <button type="button" onClick={() => refresh()} className="csm-muted px-3 hover:text-zinc-800 dark:hover:text-zinc-300">
+        <button type="button" onClick={() => refresh()} className={cn(ui.muted, 'px-3 hover:text-zinc-800 dark:hover:text-zinc-300')}>
           {t('nav.refresh')}
         </button>
       </div>
@@ -132,21 +133,21 @@ export function GitPanel({
       )}
 
       {tab === 'log' ? (
-        <ul className="csm-divider flex-1 divide-y overflow-y-auto text-xs">
+        <ul className={cn(ui.divider, 'flex-1 divide-y overflow-y-auto text-xs')}>
           {log.map((entry) => (
             <li key={entry.hash} className="px-3 py-2">
-              <p className="csm-muted font-mono">{entry.hash.slice(0, 7)}</p>
+              <p className={cn(ui.muted, 'font-mono')}>{entry.hash.slice(0, 7)}</p>
               <p className="mt-1 text-zinc-800 dark:text-zinc-300">{entry.message}</p>
-              <p className="csm-muted mt-0.5">
+              <p className={cn(ui.muted, 'mt-0.5')}>
                 {entry.author} · {entry.date}
               </p>
             </li>
           ))}
-          {log.length === 0 && !loading && <li className="csm-muted p-4">{t('git.noLog')}</li>}
+          {log.length === 0 && !loading && <li className={cn(ui.muted, 'p-4')}>{t('git.noLog')}</li>}
         </ul>
       ) : (
         <>
-          <ul className="csm-divider max-h-40 divide-y overflow-y-auto text-sm">
+          <ul className={cn(ui.divider, 'max-h-40 divide-y overflow-y-auto text-sm')}>
             {status?.files.map((f) => (
               <li key={f.path}>
                 <button
@@ -162,26 +163,26 @@ export function GitPanel({
               </li>
             ))}
             {status?.clean && (
-              <li className="csm-muted px-3 py-4 text-center text-xs">{t('git.workspaceClean')}</li>
+              <li className={cn(ui.muted, 'px-3 py-4 text-center text-xs')}>{t('git.workspaceClean')}</li>
             )}
           </ul>
-          <pre className="csm-border min-h-0 flex-1 overflow-auto border-t bg-zinc-100/80 p-3 font-mono text-xs text-zinc-600 dark:bg-zinc-900/40 dark:text-zinc-400">
+          <pre className={cn(ui.border, 'min-h-0 flex-1 overflow-auto border-t bg-zinc-100/80 p-3 font-mono text-xs text-zinc-600 dark:bg-zinc-900/40 dark:text-zinc-400')}>
             {selectedPath ? diff || t('git.loadingDiff') : t('git.selectDiff')}
           </pre>
-          <div className="csm-border shrink-0 border-t p-3">
+          <div className={cn(ui.border, 'shrink-0 border-t p-3')}>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={t('git.commitPlaceholder')}
               rows={2}
-              className="csm-input w-full resize-none rounded-lg px-2 py-1.5 text-sm"
+              className={cn(ui.input, 'w-full resize-none rounded-lg px-2 py-1.5 text-sm')}
             />
             <div className="mt-2 flex gap-2">
               <button
                 type="button"
                 disabled={loading || !selectedPath}
                 onClick={() => handleCommit(false)}
-                className="csm-btn flex-1 py-1.5 text-xs disabled:opacity-40"
+                className={cn(ui.btn, 'flex-1 py-1.5 text-xs disabled:opacity-40')}
               >
                 {t('git.commitSelected')}
               </button>

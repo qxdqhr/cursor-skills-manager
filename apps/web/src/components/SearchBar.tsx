@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { cn, ui } from '../lib/ui.js';
 
 export function SearchBar({
   query,
@@ -16,7 +17,10 @@ export function SearchBar({
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         placeholder={t('search.placeholder')}
-        className="csm-input min-w-[200px] flex-1 rounded-lg px-3 py-2 text-sm transition-[border-color,box-shadow] focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+        className={cn(
+          ui.input,
+          'min-w-[200px] flex-1 rounded-lg px-3 py-2 text-sm transition-[border-color,box-shadow] focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600',
+        )}
       />
     </div>
   );

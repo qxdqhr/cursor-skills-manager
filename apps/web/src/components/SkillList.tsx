@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { cn, ui } from '../lib/ui.js';
 import type { SkillSummary } from '../types.js';
 
 function formatTime(ms: number, locale: string): string {
@@ -27,13 +28,13 @@ export function SkillList({
 
   if (loading) {
     return (
-      <div className="csm-muted flex flex-1 items-center justify-center p-8">{t('skills.loading')}</div>
+      <div className={cn(ui.muted, 'flex flex-1 items-center justify-center p-8')}>{t('skills.loading')}</div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="csm-muted flex flex-1 flex-col items-center justify-center gap-2 p-8">
+      <div className={cn(ui.muted, 'flex flex-1 flex-col items-center justify-center gap-2 p-8')}>
         <p>{t('skills.empty')}</p>
         <p className="text-xs">{t('skills.emptyHint')}</p>
       </div>
@@ -41,7 +42,7 @@ export function SkillList({
   }
 
   return (
-    <ul className="csm-divider divide-y overflow-y-auto">
+    <ul className={cn(ui.divider, 'divide-y overflow-y-auto')}>
       {items.map((skill) => (
         <li key={skill.skillId}>
           <button
@@ -90,8 +91,8 @@ export function SkillList({
                 </span>
               )}
             </div>
-            <p className="csm-muted mt-1 line-clamp-2 text-sm">{skill.description}</p>
-            <p className="csm-muted mt-1 font-mono text-xs">
+            <p className={cn(ui.muted, 'mt-1 line-clamp-2 text-sm')}>{skill.description}</p>
+            <p className={cn(ui.muted, 'mt-1 font-mono text-xs')}>
               {skill.relativePath || skill.name}
               {skill.categoryPath ? ` · ${skill.categoryPath}` : ''}
               {' · '}

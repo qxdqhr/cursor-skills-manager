@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { HeaderPreferences } from './HeaderPreferences.js';
 import { ResizablePanel } from './ResizablePanel.js';
 import { usePanelLayout } from '../hooks/usePanelLayout.js';
+import { cn, ui } from '../lib/ui.js';
 
 export function AppLayout({
   toolbar,
@@ -44,11 +45,11 @@ export function AppLayout({
   );
 
   return (
-    <div className="csm-shell">
-      <header className="csm-header">
+    <div className={ui.shell}>
+      <header className={ui.header}>
         <div className="shrink-0">
           <h1 className="text-lg font-semibold tracking-tight text-wrap-balance">{t('app.title')}</h1>
-          <p className="csm-muted text-xs text-wrap-pretty">{t('app.subtitle')}</p>
+          <p className={cn(ui.muted, 'text-xs text-wrap-pretty')}>{t('app.subtitle')}</p>
         </div>
         {toolbar}
         <HeaderPreferences />
@@ -56,7 +57,7 @@ export function AppLayout({
         <button
           type="button"
           onClick={onOpenSettings}
-          className="csm-btn shrink-0 transition-transform active:scale-[0.96]"
+          className={cn(ui.btn, 'shrink-0 transition-transform active:scale-[0.96]')}
         >
           {t('nav.settings')}
         </button>

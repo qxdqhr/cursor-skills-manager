@@ -12,6 +12,7 @@ import {
   putSkill,
   validateSkillDraft,
 } from '../lib/api.js';
+import { cn, ui } from '../lib/ui.js';
 import type { SkillDetail, SkillFrontmatter, ValidationError } from '../types.js';
 
 type Tab = 'edit' | 'files';
@@ -111,7 +112,7 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
 
   if (loading || !detail || !frontmatter) {
     return (
-      <div className="csm-muted flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div className={cn(ui.muted, 'flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950')}>
         {loading ? t('editor.loading') : t('editor.loadFailed')}
       </div>
     );
@@ -120,9 +121,13 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
   const readOnly = detail.readOnly || detail.source !== 'personal';
 
   return (
-    <div className="csm-shell">
-      <header className="csm-header gap-3">
-        <button type="button" onClick={onBack} className="csm-muted text-sm hover:text-zinc-800 dark:hover:text-zinc-200">
+    <div className={ui.shell}>
+      <header className={cn(ui.header, 'gap-3')}>
+        <button
+          type="button"
+          onClick={onBack}
+          className={cn(ui.muted, 'text-sm hover:text-zinc-800 dark:hover:text-zinc-200')}
+        >
           {t('nav.backList')}
         </button>
         <h1 className="font-mono text-sm text-zinc-900 dark:text-zinc-200">{detail.name}</h1>
@@ -135,14 +140,14 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
           <button
             type="button"
             onClick={() => setTab('edit')}
-            className={`rounded px-2 py-1 text-xs ${tab === 'edit' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100' : 'csm-muted'}`}
+            className={cn('rounded px-2 py-1 text-xs', tab === 'edit' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100' : ui.muted)}
           >
             {t('editor.tabEdit')}
           </button>
           <button
             type="button"
             onClick={() => setTab('files')}
-            className={`rounded px-2 py-1 text-xs ${tab === 'files' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100' : 'csm-muted'}`}
+            className={cn('rounded px-2 py-1 text-xs', tab === 'files' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100' : ui.muted)}
           >
             {t('editor.tabFiles')}
           </button>
@@ -159,7 +164,7 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
                 type="button"
                 onClick={handleSave}
                 disabled={saving || !dirty}
-                className="csm-btn-primary py-1.5 disabled:opacity-40"
+                className={cn(ui.btnPrimary, 'py-1.5 disabled:opacity-40')}
               >
                 {saving ? t('editor.saving') : t('editor.save')}
               </button>
@@ -174,7 +179,7 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
         </div>
       ) : (
         <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
-          <div className="csm-border flex min-h-0 flex-col border-r">
+          <div className={cn(ui.border, 'flex min-h-0 flex-col border-r')}>
             <FrontmatterForm
               frontmatter={frontmatter}
               onChange={(fm) => {
@@ -195,8 +200,8 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
               />
             </div>
           </div>
-          <div className="csm-border min-h-0 overflow-auto border-l bg-zinc-100/50 dark:bg-zinc-900/30">
-            <p className="csm-border csm-muted border-b px-4 py-2 text-xs">{t('editor.preview')}</p>
+          <div className={cn(ui.border, 'min-h-0 overflow-auto border-l bg-zinc-100/50 dark:bg-zinc-900/30')}>
+            <p className={cn(ui.border, ui.muted, 'border-b px-4 py-2 text-xs')}>{t('editor.preview')}</p>
             <MarkdownPreview markdown={bodyMarkdown} />
           </div>
         </div>
