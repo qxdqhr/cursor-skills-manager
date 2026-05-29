@@ -17,7 +17,7 @@ import { SkillList } from '../components/SkillList.js';
 import { Toast } from '../components/Toast.js';
 import { NewSkillDialog } from '../components/NewSkillDialog.js';
 import { GitPanel } from '../components/GitPanel.js';
-import { SyncAgentsModal } from '../components/SyncAgentsModal.js';
+import { SyncAgentsModal as PublishPlatformsModal } from '../components/SyncAgentsModal.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { ApiClientError, fetchSkills, fetchSkillsTree } from '../lib/api.js';
 import { getStoredToken } from '../lib/token.js';
@@ -148,7 +148,7 @@ export function SkillsPage({
               onClick={() => setSyncOpen(true)}
               className={cn(ui.btn, 'transition-transform active:scale-[0.96]')}
             >
-              {t('nav.syncAgents')}
+              {t('nav.publishPlatforms')}
             </button>
             <button
               type="button"
@@ -243,6 +243,7 @@ export function SkillsPage({
               if (selected?.readOnly) return;
               onEditSkill(id);
             }}
+            onBindingsChanged={() => load()}
           />
         }
       >
@@ -256,7 +257,7 @@ export function SkillsPage({
       </AppLayout>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <GitPanel open={gitOpen} onClose={() => setGitOpen(false)} onCommitted={() => load()} />
-      <SyncAgentsModal open={syncOpen} onClose={() => setSyncOpen(false)} onDone={() => load()} />
+      <PublishPlatformsModal open={syncOpen} onClose={() => setSyncOpen(false)} onDone={() => load()} />
       <NewSkillDialog
         open={newOpen}
         onClose={() => setNewOpen(false)}

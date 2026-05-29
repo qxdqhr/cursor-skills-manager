@@ -8,6 +8,9 @@
 
 ### Added
 
+- **M8**：`platforms/publish.ts`（publish/repair/unpublish symlink）、`POST /platforms/:id/publish|repair`、`POST /integrations/sync-platforms`
+- **M8**：顶栏「发布到平台」Modal（多选平台、预览 dry-run、force 冲突）；详情页单 skill 发布/修复
+- **M8**：`scripts/verify-m8.mjs`、`pnpm verify:m7` / `pnpm verify:m8`
 - **M7**：多 Agent 平台注册表（cursor/agents/opencode/claude/codex）、`config.json` v2 自动迁移
 - **M7**：`checkPlatformBinding` / `SkillSummary.bindings[]` + SQLite `platform_bindings` 索引
 - **M7**：`GET /platforms`、`GET /platforms/:id/bindings`；`GET /skills?platform=&bindingIssue=`

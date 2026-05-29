@@ -10,6 +10,7 @@
     "refresh": "Refresh",
     "new": "New",
     "syncAgents": "Sync agents",
+    "publishPlatforms": "Publish to platforms",
     "git": "Git",
     "close": "Close"
   },
@@ -68,6 +69,10 @@
     "agentsUnlinked": "agents unlinked",
     "bindingIssue": "{{platform}} issue",
     "bindingsTitle": "Platform bindings",
+    "publishTitle": "Publish to platforms",
+    "publishOne": "Publish",
+    "publishMulti": "Multi…",
+    "repairBinding": "Repair",
     "openEditor": "Open editor",
     "openFolder": "Open folder",
     "openInEditor": "Open in editor",
@@ -182,6 +187,22 @@
     "failed": "Sync failed",
     "start": "Run sync",
     "cancel": "Cancel"
+  },
+  "publish": {
+    "title": "Publish to agent platforms",
+    "hintAll": "Publish all personal skills to selected platforms (symlink).",
+    "hintSelected": "Publish {{count}} selected skill(s) to selected platforms.",
+    "selectPlatform": "Select at least one platform",
+    "preview": "Preview",
+    "start": "Publish",
+    "running": "Working…",
+    "noOutput": "(no output yet — try Preview)",
+    "failed": "Publish failed",
+    "cancel": "Cancel",
+    "forceReplace": "Force replace empty directory conflicts",
+    "forceConfirm": "Force safe-to-replace conflicts?",
+    "conflictGeneric": "Unresolved publish conflict",
+    "conflictsRemain": "{{count}} conflict(s) remain"
   },
   "files": {
     "loading": "Loading files…",

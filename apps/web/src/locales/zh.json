@@ -10,6 +10,7 @@
     "refresh": "刷新",
     "new": "新建",
     "syncAgents": "同步 agents",
+    "publishPlatforms": "发布到平台",
     "git": "Git",
     "close": "关闭"
   },
@@ -68,6 +69,10 @@
     "agentsUnlinked": "agents 未链接",
     "bindingIssue": "{{platform}} 异常",
     "bindingsTitle": "平台绑定",
+    "publishTitle": "发布到平台",
+    "publishOne": "发布",
+    "publishMulti": "多平台…",
+    "repairBinding": "修复",
     "openEditor": "打开编辑器",
     "openFolder": "打开目录",
     "openInEditor": "用编辑器打开",
@@ -182,6 +187,22 @@
     "failed": "同步失败",
     "start": "开始同步",
     "cancel": "取消"
+  },
+  "publish": {
+    "title": "发布到 Agent 平台",
+    "hintAll": "将主库全部 personal skill 发布到所选平台（symlink）。",
+    "hintSelected": "将选中的 {{count}} 个 skill 发布到所选平台。",
+    "selectPlatform": "请至少选择一个平台",
+    "preview": "预览",
+    "start": "发布",
+    "running": "处理中…",
+    "noOutput": "（尚无输出，可先点预览）",
+    "failed": "发布失败",
+    "cancel": "取消",
+    "forceReplace": "强制替换空目录冲突项",
+    "forceConfirm": "是否强制处理可安全替换的冲突？",
+    "conflictGeneric": "存在无法自动处理的冲突",
+    "conflictsRemain": "仍有 {{count}} 项冲突未解决"
   },
   "files": {
     "loading": "加载文件列表…",

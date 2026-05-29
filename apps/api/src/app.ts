@@ -28,7 +28,7 @@ import {
 } from './services/skillWrite.js';
 import { getGitDiff, getGitLog, getGitStatus, postGitCommit } from './services/git.js';
 import { getAgentsLinks, openTarget, syncAgents } from './services/integrations.js';
-import { listPlatformBindings, listPlatforms } from './services/platforms.js';
+import { listPlatformBindings, listPlatforms, publishPlatformSkills, repairPlatformSkills, syncPlatforms } from './services/platforms.js';
 
 type Env = { Variables: { ctx: AppContext } };
 
@@ -288,6 +288,54 @@ export function createApp() {
     const ctx = c.get('ctx');
     const platformId = c.req.param('platformId');
     const data = await listPlatformBindings(ctx.config, platformId);
+    return jsonOk(c, data);
+  });
+
+  app.post('/platforms/:platformId/publish', async (c) => {
+    const ctx = c.get('ctx');
+    const platformId = c.req.param('platformId');
+    const body = (await c.req.json()) as {
+      skillIds?: string[];
+      all?: boolean;
+      dryRun?: boolean;
+      force?: boolean;
+    };
+    const data = await publishPlatformSkills(ctx.config, platformId, body);
+    if (!body.dryRun) {
+      await refreshIndex(ctx);
+    }
+    return jsonOk(c, data);
+  });
+
+  app.post('/platforms/:platformId/repair', async (c) => {
+    const ctx = c.get('ctx');
+    const platformId = c.req.param('platformId');
+    const body = (await c.req.json()) as {
+      skillIds?: string[];
+      all?: boolean;
+      dryRun?: boolean;
+      force?: boolean;
+    };
+    const data = await repairPlatformSkills(ctx.config, platformId, body);
+    if (!body.dryRun) {
+      await refreshIndex(ctx);
+    }
+    return jsonOk(c, data);
+  });
+
+  app.post('/integrations/sync-platforms', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as {
+      platformIds?: string[];
+      skillIds?: string[];
+      all?: boolean;
+      dryRun?: boolean;
+      force?: boolean;
+    };
+    const data = await syncPlatforms(ctx.config, body);
+    if (!body.dryRun) {
+      await refreshIndex(ctx);
+    }
     return jsonOk(c, data);
   });
 

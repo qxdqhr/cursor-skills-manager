@@ -18,6 +18,8 @@
     "verify:m2": "pnpm --filter @csm/core build && node scripts/verify-m2.mjs",
     "verify:m4": "pnpm --filter @csm/core build && node scripts/verify-m4.mjs",
     "verify:m5": "pnpm --filter @csm/core build && node scripts/verify-m5.mjs",
+    "verify:m7": "pnpm --filter @csm/core build && node scripts/verify-m7.mjs",
+    "verify:m8": "pnpm --filter @csm/core build && node scripts/verify-m8.mjs",
     "smoke": "bash scripts/smoke.sh",
     "lint": "eslint ."
   },

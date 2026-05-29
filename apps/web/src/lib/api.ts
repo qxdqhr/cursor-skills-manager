@@ -219,6 +219,70 @@ export async function postSyncAgents(): Promise<{
   return request('/integrations/sync-agents', { method: 'POST' });
 }
 
+export type PublishBatchResult = {
+  platformId: PlatformId;
+  dryRun: boolean;
+  items: {
+    skillId: string;
+    name: string;
+    action: string;
+    linkPath: string;
+    target: string;
+    issue?: string;
+    message?: string;
+  }[];
+  summary: {
+    created: number;
+    skipped: number;
+    repaired: number;
+    conflicts: number;
+    unpublished: number;
+  };
+};
+
+export async function postPlatformPublish(
+  platformId: PlatformId,
+  body: {
+    skillIds?: string[];
+    all?: boolean;
+    dryRun?: boolean;
+    force?: boolean;
+  },
+): Promise<PublishBatchResult> {
+  return request(`/platforms/${platformId}/publish`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function postPlatformRepair(
+  platformId: PlatformId,
+  body: {
+    skillIds?: string[];
+    all?: boolean;
+    dryRun?: boolean;
+    force?: boolean;
+  },
+): Promise<PublishBatchResult> {
+  return request(`/platforms/${platformId}/repair`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function postSyncPlatforms(body: {
+  platformIds?: PlatformId[];
+  skillIds?: string[];
+  all?: boolean;
+  dryRun?: boolean;
+  force?: boolean;
+}): Promise<{ platforms: PublishBatchResult[] }> {
+  return request('/integrations/sync-platforms', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
 export async function fetchAgentsLinks(): Promise<{
   items: { name: string; skillId: string; agentsLink: { exists: boolean; ok: boolean; target: string | null } }[];
 }> {
