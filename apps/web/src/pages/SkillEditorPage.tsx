@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FrontmatterForm } from '../components/FrontmatterForm.js';
+import { HeaderPreferences } from '../components/HeaderPreferences.js';
 import { MarkdownEditor } from '../components/MarkdownEditor.js';
 import { MarkdownPreview } from '../components/MarkdownPreview.js';
 import { SkillFilesTab } from '../components/SkillFilesTab.js';
@@ -136,18 +137,26 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
             {t('editor.readOnly')}
           </span>
         )}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={() => setTab('edit')}
-            className={cn('rounded px-2 py-1 text-xs', tab === 'edit' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100' : ui.muted)}
+            className={cn(
+              ui.btn,
+              'py-1 text-xs',
+              tab === 'edit' && 'border-emerald-600/40 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200',
+            )}
           >
             {t('editor.tabEdit')}
           </button>
           <button
             type="button"
             onClick={() => setTab('files')}
-            className={cn('rounded px-2 py-1 text-xs', tab === 'files' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100' : ui.muted)}
+            className={cn(
+              ui.btn,
+              'py-1 text-xs',
+              tab === 'files' && 'border-emerald-600/40 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200',
+            )}
           >
             {t('editor.tabFiles')}
           </button>
@@ -170,6 +179,7 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
               </button>
             </>
           )}
+          <HeaderPreferences />
         </div>
       </header>
 

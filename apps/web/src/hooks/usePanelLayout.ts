@@ -9,6 +9,8 @@ export type PanelConfig = {
   lastWidth: number;
 };
 
+export const MAX_COLLAPSED_PANELS = 2;
+
 export type PanelLayoutState = Record<PanelId, PanelConfig>;
 
 const STORAGE_KEY = 'csm.panelLayout.v1';
@@ -32,26 +34,50 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+function countCollapsed(state: PanelLayoutState): number {
+  return (['browse', 'list', 'detail'] as PanelId[]).filter((id) => state[id].collapsed).length;
+}
+
+/** At most two panels collapsed — expand extras (detail → browse → list priority). */
+function normalizeCollapsed(state: PanelLayoutState): PanelLayoutState {
+  if (countCollapsed(state) <= MAX_COLLAPSED_PANELS) return state;
+  const next: PanelLayoutState = {
+    browse: { ...state.browse },
+    list: { ...state.list },
+    detail: { ...state.detail },
+  };
+  for (const id of ['detail', 'browse', 'list'] as PanelId[]) {
+    if (countCollapsed(next) <= MAX_COLLAPSED_PANELS) break;
+    if (!next[id].collapsed) continue;
+    next[id] = { ...next[id], collapsed: false, width: next[id].lastWidth };
+  }
+  return next;
+}
+
+function parseStoredState(parsed: Partial<PanelLayoutState>): PanelLayoutState {
+  return (['browse', 'list', 'detail'] as PanelId[]).reduce((acc, id) => {
+    const fallback = DEFAULTS[id];
+    const saved = parsed[id];
+    acc[id] = {
+      width: clamp(saved?.width ?? fallback.width, PANEL_LIMITS[id].min, PANEL_LIMITS[id].max),
+      collapsed: saved?.collapsed ?? fallback.collapsed,
+      lastWidth: clamp(
+        saved?.lastWidth ?? saved?.width ?? fallback.lastWidth,
+        PANEL_LIMITS[id].min,
+        PANEL_LIMITS[id].max,
+      ),
+    };
+    return acc;
+  }, {} as PanelLayoutState);
+}
+
 function loadState(): PanelLayoutState {
   if (typeof window === 'undefined') return DEFAULTS;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<PanelLayoutState>;
-    return (['browse', 'list', 'detail'] as PanelId[]).reduce((acc, id) => {
-      const fallback = DEFAULTS[id];
-      const saved = parsed[id];
-      acc[id] = {
-        width: clamp(saved?.width ?? fallback.width, PANEL_LIMITS[id].min, PANEL_LIMITS[id].max),
-        collapsed: saved?.collapsed ?? fallback.collapsed,
-        lastWidth: clamp(
-          saved?.lastWidth ?? saved?.width ?? fallback.lastWidth,
-          PANEL_LIMITS[id].min,
-          PANEL_LIMITS[id].max,
-        ),
-      };
-      return acc;
-    }, {} as PanelLayoutState);
+    return normalizeCollapsed(parseStoredState(parsed));
   } catch {
     return DEFAULTS;
   }
@@ -76,10 +102,12 @@ export function usePanelLayout() {
     }));
   }, []);
 
-  const toggleCollapsed = useCallback((id: PanelId) => {
+  const toggleCollapsed = useCallback((id: PanelId): boolean => {
+    let changed = false;
     setPanels((prev) => {
       const panel = prev[id];
       if (panel.collapsed) {
+        changed = true;
         return {
           ...prev,
           [id]: {
@@ -89,6 +117,11 @@ export function usePanelLayout() {
           },
         };
       }
+      if (countCollapsed(prev) >= MAX_COLLAPSED_PANELS) {
+        changed = false;
+        return prev;
+      }
+      changed = true;
       return {
         ...prev,
         [id]: {
@@ -98,7 +131,15 @@ export function usePanelLayout() {
         },
       };
     });
+    return changed;
   }, []);
+
+  const collapsedCount = countCollapsed(panels);
+
+  const canCollapsePanel = useCallback(
+    (id: PanelId) => !panels[id].collapsed && collapsedCount < MAX_COLLAPSED_PANELS,
+    [panels, collapsedCount],
+  );
 
   const adjustWidth = useCallback((id: PanelId, delta: number) => {
     const { min, max } = PANEL_LIMITS[id];
@@ -123,5 +164,5 @@ export function usePanelLayout() {
     [panels],
   );
 
-  return { panels, setWidth, adjustWidth, toggleCollapsed, panelWidth };
+  return { panels, setWidth, adjustWidth, toggleCollapsed, panelWidth, collapsedCount, canCollapsePanel };
 }

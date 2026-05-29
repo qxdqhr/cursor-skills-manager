@@ -10,6 +10,7 @@ import {
   type SkillQuickFilters,
 } from '../components/BrowsePanel.js';
 import type { TreeSelection } from '../components/CategoryTree.js';
+import { categoryPathLabel } from '../components/CategoryTree.js';
 import { SearchBar } from '../components/SearchBar.js';
 import { SkillDetailPanel } from '../components/SkillDetailPanel.js';
 import { SkillList } from '../components/SkillList.js';
@@ -21,27 +22,19 @@ import { useDebounce } from '../hooks/useDebounce.js';
 import { ApiClientError, fetchSkills, fetchSkillsTree } from '../lib/api.js';
 import { getStoredToken } from '../lib/token.js';
 import { cn, ui } from '../lib/ui.js';
+import { normalizeSkillsTree } from '../lib/categories.js';
 import type { SkillSummary, SkillsTree } from '../types.js';
+import { matchesCategoryPath } from '../types.js';
 
 function matchesTree(skill: SkillSummary, sel: TreeSelection): boolean {
   if (sel.type === 'all') return true;
   if (sel.type === 'project') {
     const prefix = `project:${sel.workspaceId}:`;
     if (!skill.skillId.startsWith(prefix)) return false;
-    if (!sel.categoryPath) return true;
-    return (
-      skill.categoryPath === sel.categoryPath ||
-      skill.categoryPath.startsWith(`${sel.categoryPath}/`) ||
-      skill.name === sel.categoryPath
-    );
+    return matchesCategoryPath(skill, sel.categoryPath);
   }
   if (skill.source !== 'personal') return false;
-  if (!sel.categoryPath) return true;
-  return (
-    skill.categoryPath === sel.categoryPath ||
-    skill.categoryPath.startsWith(`${sel.categoryPath}/`) ||
-    skill.name === sel.categoryPath
-  );
+  return matchesCategoryPath(skill, sel.categoryPath);
 }
 
 function matchesQuickFilters(skill: SkillSummary, filters: SkillQuickFilters): boolean {
@@ -51,14 +44,14 @@ function matchesQuickFilters(skill: SkillSummary, filters: SkillQuickFilters): b
   return true;
 }
 
-function treeFilterLabel(sel: TreeSelection, t: (k: string) => string): string | null {
+function treeFilterLabel(sel: TreeSelection, t: (key: string, opts?: Record<string, string>) => string): string | null {
   if (sel.type === 'all') return null;
   if (sel.type === 'personal') {
-    return sel.categoryPath ? sel.categoryPath : t('tree.personalAll');
+    if (!sel.categoryPath) return t('tree.personalAll');
+    return categoryPathLabel(sel, t);
   }
-  return sel.categoryPath
-    ? `${sel.workspaceId} / ${sel.categoryPath}`
-    : `${sel.workspaceId} / ${t('tree.projectAll')}`;
+  if (!sel.categoryPath) return t('tree.projectAll', { workspace: sel.workspaceId });
+  return categoryPathLabel(sel, t);
 }
 
 export function SkillsPage({
@@ -117,7 +110,7 @@ export function SkillsPage({
   useEffect(() => {
     if (!getStoredToken()) return;
     fetchSkillsTree()
-      .then(setTree)
+      .then((data) => setTree(normalizeSkillsTree(data)))
       .catch(() => setTree({ personal: [], project: [] }));
   }, []);
 
@@ -130,6 +123,15 @@ export function SkillsPage({
       .filter((s) => matchesTree(s, treeSelection))
       .filter((s) => matchesQuickFilters(s, quickFilters));
   }, [items, treeSelection, quickFilters]);
+
+  useEffect(() => {
+    if (loading) return;
+    setSelected((prev) => {
+      if (filtered.length === 0) return null;
+      if (prev && filtered.some((s) => s.skillId === prev.skillId)) return prev;
+      return filtered[0] ?? null;
+    });
+  }, [filtered, loading]);
 
   const treeLabel = treeFilterLabel(treeSelection, t);
   const quickFilterCount = countActiveQuickFilters(quickFilters);
@@ -149,14 +151,8 @@ export function SkillsPage({
             </button>
             <button
               type="button"
-              onClick={() => setGitOpen((o) => !o)}
-              className={cn(
-                ui.btn,
-                'transition-transform active:scale-[0.96]',
-                gitOpen
-                  ? 'border-emerald-600 bg-emerald-100 text-emerald-800 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.25)] dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                  : '',
-              )}
+              onClick={() => setGitOpen(true)}
+              className={cn(ui.btn, 'transition-transform active:scale-[0.96]')}
             >
               {t('nav.git')}
             </button>
@@ -248,9 +244,6 @@ export function SkillsPage({
             }}
           />
         }
-        gitPanel={
-          <GitPanel open={gitOpen} onClose={() => setGitOpen(false)} onCommitted={() => load()} />
-        }
       >
         <SkillList
           items={filtered}
@@ -261,6 +254,7 @@ export function SkillsPage({
         />
       </AppLayout>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      <GitPanel open={gitOpen} onClose={() => setGitOpen(false)} onCommitted={() => load()} />
       <SyncAgentsModal open={syncOpen} onClose={() => setSyncOpen(false)} onDone={() => load()} />
       <NewSkillDialog
         open={newOpen}

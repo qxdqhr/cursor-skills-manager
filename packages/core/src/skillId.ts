@@ -28,3 +28,6 @@ export function parseCategoryPath(relativePath: string, skillName: string): stri
 export function skillNameFromDir(skillDirPath: string): string {
   return basename(skillDirPath);
 }
+
+/** Virtual tree node id for skills at personal/project root (no category folder). */
+export const UNCATEGORIZED_CATEGORY_ID = '__uncategorized__';

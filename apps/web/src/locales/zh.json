@@ -38,6 +38,7 @@
     "detailShort": "详情",
     "expandPanel": "展开{{panel}}",
     "collapsePanel": "收起{{panel}}",
+    "maxCollapsed": "最多同时收起两个面板，请先展开其中一个",
     "resizePanel": "调整{{panel}}宽度"
   },
   "filters": {
@@ -114,7 +115,11 @@
     "fixValidation": "请先修复校验错误",
     "saved": "已保存",
     "saveFailed": "保存失败",
-    "deleteFailed": "删除失败"
+    "deleteFailed": "删除失败",
+    "filesLoading": "加载文件列表…",
+    "filesEmpty": "无附属文件（仅 SKILL.md）",
+    "fileTypeDir": "目录",
+    "fileTypeFile": "文件"
   },
   "newSkill": {
     "title": "新建 Skill",
@@ -165,8 +170,14 @@
     "all": "全部",
     "loading": "加载分类…",
     "personal": "个人主库",
+    "personalHint": "~/.cursor/skills",
     "personalAll": "全部个人",
-    "projectAll": "全部该项目"
+    "project": "项目",
+    "projectAll": "{{workspace}} 全部",
+    "uncategorized": "未分类（根目录）",
+    "noFolders": "暂无子目录",
+    "toggleFolder": "展开/收起 {{name}}",
+    "editHint": "分类 = 磁盘上的文件夹。将 skill 目录移入 ~/.cursor/skills/<分类>/ 即可；新建 skill 时填写 categoryPath；项目 skill 在 <项目>/.cursor/skills/ 下同样规则。"
   },
   "common": {
     "loadFailed": "加载失败"

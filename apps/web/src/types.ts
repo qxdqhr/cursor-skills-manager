@@ -1,5 +1,8 @@
 export type SkillSource = 'personal' | 'project';
 
+export type { SkillTreeNode, SkillsTree } from './lib/categories.js';
+export { UNCATEGORIZED_CATEGORY_ID, matchesCategoryPath, normalizeSkillsTree } from './lib/categories.js';
+
 export interface ValidationError {
   field: string;
   code: string;
@@ -21,22 +24,6 @@ export interface SkillSummary {
   validation: { ok: boolean; errors: ValidationError[] };
   git?: { dirty?: boolean };
   agentsLink?: { exists: boolean; ok: boolean; target: string | null };
-}
-
-export interface SkillTreeNode {
-  id: string;
-  label: string;
-  skillCount: number;
-  children: SkillTreeNode[];
-}
-
-export interface SkillsTree {
-  personal: SkillTreeNode[];
-  project: {
-    workspaceId: string;
-    workspacePath: string;
-    categories: SkillTreeNode[];
-  }[];
 }
 
 export interface PublicConfig {

@@ -12,7 +12,6 @@ export function AppLayout({
   listHeader,
   children,
   detail,
-  gitPanel,
   onOpenSettings,
   headerActions,
 }: {
@@ -21,12 +20,12 @@ export function AppLayout({
   listHeader?: ReactNode;
   children: ReactNode;
   detail?: ReactNode;
-  gitPanel?: ReactNode;
   onOpenSettings: () => void;
   headerActions?: ReactNode;
 }) {
   const { t } = useTranslation();
-  const { panels, setWidth, adjustWidth, toggleCollapsed, panelWidth } = usePanelLayout();
+  const { panels, setWidth, adjustWidth, toggleCollapsed, panelWidth, canCollapsePanel } = usePanelLayout();
+  const maxCollapsedHint = t('layout.maxCollapsed');
 
   const resizeDetailFromList = useCallback(
     (delta: number) => {
@@ -63,7 +62,7 @@ export function AppLayout({
         </button>
       </header>
 
-      <div className="flex min-h-0 flex-1 overflow-hidden">
+      <div className="flex min-h-0 w-full flex-1 overflow-hidden">
         <ResizablePanel
           panelId="browse"
           title={t('layout.browse')}
@@ -71,7 +70,15 @@ export function AppLayout({
           width={panelWidth('browse')}
           onWidthChange={(w) => setWidth('browse', w)}
           onToggleCollapsed={() => toggleCollapsed('browse')}
+          collapseDisabled={!canCollapsePanel('browse')}
+          collapseDisabledHint={maxCollapsedHint}
           resizeFrom="right"
+          suppressResizeRight={!panels.list.collapsed}
+          onResizeRightEdge={
+            !panels.browse.collapsed && panels.list.collapsed
+              ? (delta) => adjustWidth('browse', delta)
+              : undefined
+          }
           collapsedLabel={t('layout.browseShort')}
         >
           {browse}
@@ -84,10 +91,15 @@ export function AppLayout({
           width={panelWidth('list')}
           onWidthChange={(w) => setWidth('list', w)}
           onToggleCollapsed={() => toggleCollapsed('list')}
+          collapseDisabled={!canCollapsePanel('list')}
+          collapseDisabledHint={maxCollapsedHint}
           resizeFrom="right"
-          flexible
-          onResizeLeftEdge={resizeListFromBrowse}
-          onResizeRightEdge={resizeDetailFromList}
+          onResizeLeftEdge={!panels.list.collapsed ? resizeListFromBrowse : undefined}
+          onResizeRightEdge={
+            !panels.list.collapsed && !panels.detail.collapsed
+              ? resizeDetailFromList
+              : undefined
+          }
           collapsedLabel={t('layout.listShort')}
         >
           <div className="flex h-full flex-col">
@@ -104,14 +116,28 @@ export function AppLayout({
             width={panelWidth('detail')}
             onWidthChange={(w) => setWidth('detail', w)}
             onToggleCollapsed={() => toggleCollapsed('detail')}
+            collapseDisabled={!canCollapsePanel('detail')}
+            collapseDisabledHint={maxCollapsedHint}
             resizeFrom="left"
+            onResizeLeftEdge={
+              !panels.detail.collapsed && !panels.list.collapsed
+                ? (delta) => {
+                    adjustWidth('list', delta);
+                    adjustWidth('detail', -delta);
+                  }
+                : !panels.detail.collapsed && panels.list.collapsed && !panels.browse.collapsed
+                  ? (delta) => {
+                      adjustWidth('browse', delta);
+                      adjustWidth('detail', -delta);
+                    }
+                  : undefined
+            }
             collapsedLabel={t('layout.detailShort')}
           >
             {detail}
           </ResizablePanel>
         )}
 
-        {gitPanel}
       </div>
     </div>
   );

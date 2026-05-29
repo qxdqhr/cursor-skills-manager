@@ -1,14 +1,20 @@
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { AgentsLinkStatus, SkillSummary } from './types.js';
 import { checkAgentsLink } from './agentsLink.js';
+import { openFolderInEditor, openFolderInFileManager, resolveGuiEnv } from './openDesktop.js';
 import { resolvePersonalSkillDir } from './writeSkill.js';
 import { assertInsideRoot } from './paths.js';
 import type { CsmConfig } from './config.js';
 
 const execFileAsync = promisify(execFile);
+
+function spawnDetached(cmd: string, args: string[], env: NodeJS.ProcessEnv): void {
+  const child = spawn(cmd, args, { env, detached: true, stdio: 'ignore' });
+  child.unref();
+}
 
 export type ScriptRunResult = {
   exitCode: number;
@@ -76,32 +82,34 @@ export async function openSkillTarget(
   config: CsmConfig,
   skillId: string,
   target: 'folder' | 'editor' | 'terminal',
-): Promise<{ opened: string }> {
+): Promise<{ opened: string; via?: string }> {
   const personalRoot = config.paths.personalRoot;
   const skillDir = resolvePersonalSkillDir(personalRoot, skillId);
   assertInsideRoot(skillDir, personalRoot);
+  const env = resolveGuiEnv();
 
   if (target === 'folder') {
-    await execFileAsync('xdg-open', [skillDir]);
+    await openFolderInFileManager(skillDir, {
+      fileManager: config.paths.fileManager,
+    });
     return { opened: skillDir };
   }
 
   if (target === 'editor') {
-    const editor = config.paths.editor?.trim() || 'code';
-    const parts = editor.split(/\s+/);
-    const cmd = parts[0] ?? 'code';
-    const args = [...(parts.slice(1) ?? []), skillDir];
-    await execFileAsync(cmd, args);
-    return { opened: skillDir };
+    const launch = await openFolderInEditor(skillDir, config.paths.editor);
+    return { opened: skillDir, via: `${launch.cmd} ${launch.args.join(' ')}` };
   }
 
   const term = process.env.CSM_TERMINAL ?? 'x-terminal-emulator';
-  await execFileAsync(term, ['-e', 'bash', '-lc', `cd ${JSON.stringify(skillDir)}; exec bash`]);
+  spawnDetached(term, ['-e', 'bash', '-lc', `cd ${JSON.stringify(skillDir)}; exec bash`], env);
   return { opened: skillDir };
 }
 
 /** 在资源管理器中打开主库根目录 */
-export async function openPersonalRoot(personalRoot: string): Promise<{ opened: string }> {
-  await execFileAsync('xdg-open', [personalRoot]);
+export async function openPersonalRoot(
+  personalRoot: string,
+  fileManager?: string,
+): Promise<{ opened: string }> {
+  await openFolderInFileManager(personalRoot, { fileManager });
   return { opened: personalRoot };
 }

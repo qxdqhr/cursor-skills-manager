@@ -38,6 +38,7 @@
     "detailShort": "Details",
     "expandPanel": "Expand {{panel}}",
     "collapsePanel": "Collapse {{panel}}",
+    "maxCollapsed": "At most two panels can be collapsed. Expand one first.",
     "resizePanel": "Resize {{panel}}"
   },
   "filters": {
@@ -114,7 +115,11 @@
     "fixValidation": "Fix validation errors first",
     "saved": "Saved",
     "saveFailed": "Save failed",
-    "deleteFailed": "Delete failed"
+    "deleteFailed": "Delete failed",
+    "filesLoading": "Loading file list…",
+    "filesEmpty": "No extra files (SKILL.md only)",
+    "fileTypeDir": "Directory",
+    "fileTypeFile": "File"
   },
   "newSkill": {
     "title": "New skill",
@@ -165,8 +170,14 @@
     "all": "All",
     "loading": "Loading categories…",
     "personal": "Personal library",
+    "personalHint": "~/.cursor/skills",
     "personalAll": "All personal",
-    "projectAll": "All in workspace"
+    "project": "Project",
+    "projectAll": "All in {{workspace}}",
+    "uncategorized": "Uncategorized (root)",
+    "noFolders": "No subfolders",
+    "toggleFolder": "Expand/collapse {{name}}",
+    "editHint": "Categories are folders on disk. Move skill dirs under ~/.cursor/skills/<category>/; set categoryPath when creating a skill. Project skills follow the same rule under <project>/.cursor/skills/."
   },
   "common": {
     "loadFailed": "Load failed"

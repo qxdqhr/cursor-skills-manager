@@ -16,3 +16,5 @@ export * from './writeSkill.js';
 export * from './skillErrors.js';
 export * from './gitService.js';
 export * from './integrations.js';
+export * from './openDesktop.js';
+export * from './skillsTree.js';

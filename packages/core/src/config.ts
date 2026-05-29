@@ -20,6 +20,8 @@ export interface CsmConfig {
     agentsRoot?: string;
     projectScanGlobs?: string[];
     editor?: string;
+    /** e.g. `dolphin` or `gio open` — overrides CSM_FILE_MANAGER */
+    fileManager?: string;
   };
   reservedDirNames?: string[];
 }

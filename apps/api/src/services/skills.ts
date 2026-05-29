@@ -5,6 +5,9 @@ import {
   scanPersonalSkills,
   scanProjectSkills,
   parseSkillMdFile,
+  buildSkillsTree,
+  type SkillsTree,
+  type SkillTreeNode,
 } from '@csm/core';
 import { ApiError } from '../errors.js';
 
@@ -50,78 +53,5 @@ export async function getSkillDetail(
   };
 }
 
-export type SkillTreeNode = {
-  id: string;
-  label: string;
-  skillCount: number;
-  children: SkillTreeNode[];
-};
-
-export type SkillsTree = {
-  personal: SkillTreeNode[];
-  project: {
-    workspaceId: string;
-    workspacePath: string;
-    categories: SkillTreeNode[];
-  }[];
-};
-
-export function buildSkillsTree(
-  personal: SkillSummary[],
-  project: SkillSummary[],
-): SkillsTree {
-  return {
-    personal: buildCategoryTree(personal),
-    project: buildProjectTrees(project),
-  };
-}
-
-function buildCategoryTree(skills: SkillSummary[]): SkillTreeNode[] {
-  const root: SkillTreeNode[] = [];
-  for (const skill of skills) {
-    const parts = skill.categoryPath ? skill.categoryPath.split('/') : [];
-    let level = root;
-    for (const part of parts) {
-      let node = level.find((n) => n.id === part);
-      if (!node) {
-        node = { id: part, label: part, skillCount: 0, children: [] };
-        level.push(node);
-      }
-      level = node.children;
-    }
-    const leafId = skill.name;
-    let leaf = level.find((n) => n.id === leafId);
-    if (!leaf) {
-      leaf = { id: leafId, label: leafId, skillCount: 0, children: [] };
-      level.push(leaf);
-    }
-    leaf.skillCount += 1;
-  }
-  incrementParentCounts(root);
-  return root;
-}
-
-function incrementParentCounts(nodes: SkillTreeNode[]): number {
-  let sum = 0;
-  for (const n of nodes) {
-    const childSum = incrementParentCounts(n.children);
-    if (childSum > 0) n.skillCount = childSum;
-    sum += n.skillCount;
-  }
-  return sum;
-}
-
-function buildProjectTrees(skills: SkillSummary[]): SkillsTree['project'] {
-  const byWs = new Map<string, SkillSummary[]>();
-  for (const s of skills) {
-    const ws = s.skillId.split(':')[1] ?? 'project';
-    const list = byWs.get(ws) ?? [];
-    list.push(s);
-    byWs.set(ws, list);
-  }
-  return [...byWs.entries()].map(([workspaceId, list]) => ({
-    workspaceId,
-    workspacePath: list[0]?.rootPath.replace(/\/\.cursor\/skills\/?$/, '') ?? '',
-    categories: buildCategoryTree(list),
-  }));
-}
+export type { SkillTreeNode, SkillsTree };
+export { buildSkillsTree };

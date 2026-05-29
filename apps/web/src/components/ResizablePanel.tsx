@@ -2,6 +2,7 @@ import { useCallback, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PanelId } from '../hooks/usePanelLayout.js';
 import { PANEL_LIMITS } from '../hooks/usePanelLayout.js';
+import { cn } from '../lib/ui.js';
 
 export function ResizablePanel({
   panelId,
@@ -10,10 +11,13 @@ export function ResizablePanel({
   width,
   onWidthChange,
   onToggleCollapsed,
+  collapseDisabled,
+  collapseDisabledHint,
   resizeFrom,
-  flexible,
   onResizeLeftEdge,
   onResizeRightEdge,
+  suppressResizeLeft,
+  suppressResizeRight,
   children,
   collapsedLabel,
 }: {
@@ -23,12 +27,15 @@ export function ResizablePanel({
   width: number;
   onWidthChange: (width: number) => void;
   onToggleCollapsed: () => void;
+  /** When true, panel is expanded but cannot collapse (max collapsed limit). */
+  collapseDisabled?: boolean;
+  collapseDisabledHint?: string;
   /** Which edge the drag handle sits on */
   resizeFrom: 'left' | 'right';
-  /** Center column grows to fill remaining space */
-  flexible?: boolean;
   onResizeLeftEdge?: (delta: number) => void;
   onResizeRightEdge?: (delta: number) => void;
+  suppressResizeLeft?: boolean;
+  suppressResizeRight?: boolean;
   children: ReactNode;
   collapsedLabel?: string;
 }) {
@@ -97,15 +104,14 @@ export function ResizablePanel({
     [onResizeRightEdge, startDrag],
   );
 
-  const style = flexible
+  const style = collapsed
     ? ({
-        flex: collapsed ? '0 0 auto' : '1 1 0%',
-        width: collapsed ? PANEL_LIMITS[panelId].collapsedWidth : undefined,
-        minWidth: collapsed ? undefined : width,
+        flex: '0 0 auto',
+        width: PANEL_LIMITS[panelId].collapsedWidth,
       } as const)
     : ({
-        flex: '0 0 auto',
-        width: collapsed ? PANEL_LIMITS[panelId].collapsedWidth : width,
+        flex: '1 1 0%',
+        minWidth: width,
       } as const);
 
   return (
@@ -118,11 +124,22 @@ export function ResizablePanel({
         <button
           type="button"
           onClick={onToggleCollapsed}
+          disabled={!collapsed && collapseDisabled}
           aria-expanded={!collapsed}
-          aria-label={collapsed ? t('layout.expandPanel', { panel: title }) : t('layout.collapsePanel', { panel: title })}
-          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-transform hover:bg-zinc-200/80 hover:text-zinc-800 active:scale-[0.96] dark:hover:bg-zinc-800/80 dark:hover:text-zinc-200"
+          aria-label={
+            collapsed
+              ? t('layout.expandPanel', { panel: title })
+              : collapseDisabled
+                ? (collapseDisabledHint ?? t('layout.maxCollapsed'))
+                : t('layout.collapsePanel', { panel: title })
+          }
+          title={!collapsed && collapseDisabled ? (collapseDisabledHint ?? t('layout.maxCollapsed')) : undefined}
+          className={cn(
+            'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-transform hover:bg-zinc-200/80 hover:text-zinc-800 active:scale-[0.96] dark:hover:bg-zinc-800/80 dark:hover:text-zinc-200',
+            !collapsed && collapseDisabled && 'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-zinc-500 dark:hover:bg-transparent',
+          )}
         >
-          <ChevronIcon collapsed={collapsed} side={resizeFrom === 'right' ? 'left' : 'right'} />
+          <ChevronIcon collapsed={collapsed} />
         </button>
         {!collapsed && (
           <span className="min-w-0 flex-1 truncate text-xs font-medium text-zinc-700 text-wrap-balance dark:text-zinc-300">
@@ -144,24 +161,7 @@ export function ResizablePanel({
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       )}
 
-      {!collapsed && !flexible && (
-        <div
-          role="separator"
-          aria-orientation="vertical"
-          aria-label={t('layout.resizePanel', { panel: title })}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            onResizeStart(e.clientX);
-          }}
-          className={`absolute top-0 z-10 h-full w-1.5 cursor-col-resize touch-none ${
-            resizeFrom === 'right' ? '-right-0.5' : '-left-0.5'
-          }`}
-        >
-          <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-300/0 transition-colors hover:bg-zinc-400/70 dark:hover:bg-zinc-600/70" />
-        </div>
-      )}
-
-      {!collapsed && flexible && onResizeLeftEdge && (
+      {!collapsed && onResizeLeftEdge && (
         <div
           role="separator"
           aria-orientation="vertical"
@@ -176,7 +176,7 @@ export function ResizablePanel({
         </div>
       )}
 
-      {!collapsed && flexible && onResizeRightEdge && (
+      {!collapsed && onResizeRightEdge && (
         <div
           role="separator"
           aria-orientation="vertical"
@@ -190,16 +190,46 @@ export function ResizablePanel({
           <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-300/0 transition-colors hover:bg-zinc-400/70 dark:hover:bg-zinc-600/70" />
         </div>
       )}
+
+      {!collapsed && !onResizeLeftEdge && !suppressResizeLeft && resizeFrom === 'left' && (
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={t('layout.resizePanel', { panel: title })}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            onResizeStart(e.clientX);
+          }}
+          className="absolute -left-0.5 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none"
+        >
+          <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-300/0 transition-colors hover:bg-zinc-400/70 dark:hover:bg-zinc-600/70" />
+        </div>
+      )}
+
+      {!collapsed && !onResizeRightEdge && !suppressResizeRight && resizeFrom === 'right' && (
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={t('layout.resizePanel', { panel: title })}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            onResizeStart(e.clientX);
+          }}
+          className="absolute -right-0.5 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none"
+        >
+          <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-300/0 transition-colors hover:bg-zinc-400/70 dark:hover:bg-zinc-600/70" />
+        </div>
+      )}
     </div>
   );
 }
 
-function ChevronIcon({ collapsed, side }: { collapsed: boolean; side: 'left' | 'right' }) {
-  const pointsLeft = side === 'left' ? !collapsed : collapsed;
+/** Collapsed → ← (expand); expanded → → (collapse). Same on every panel. */
+function ChevronIcon({ collapsed }: { collapsed: boolean }) {
   return (
     <svg
       viewBox="0 0 16 16"
-      className={`h-4 w-4 transition-transform duration-200 ${pointsLeft ? '' : 'rotate-180'}`}
+      className={cn('h-4 w-4 transition-transform duration-200', collapsed ? '' : 'rotate-180')}
       fill="none"
       stroke="currentColor"
       strokeWidth="1.75"

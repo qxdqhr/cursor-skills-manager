@@ -1,4 +1,5 @@
 import type { SkillFrontmatter, ValidationError } from '../types.js';
+import { cn, ui } from '../lib/ui.js';
 
 type Props = {
   frontmatter: SkillFrontmatter;
@@ -16,39 +17,37 @@ export function FrontmatterForm({ frontmatter, onChange, errors, nameReadOnly = 
     ? frontmatter.paths.join(', ')
     : (frontmatter.paths ?? '');
 
+  const fieldClass = cn(ui.input, 'mt-1 w-full rounded-lg px-3 py-2 text-sm');
+
   return (
-    <div className="space-y-3 border-b border-zinc-800 p-4">
+    <div className={cn('space-y-3 border-b p-4', ui.border)}>
       <div>
-        <label className="text-xs text-zinc-500">name</label>
+        <label className={cn('text-xs', ui.muted)}>name</label>
         <input
           type="text"
           readOnly={nameReadOnly}
           value={frontmatter.name}
           onChange={(e) => onChange({ ...frontmatter, name: e.target.value })}
-          className={`mt-1 w-full rounded-lg border px-3 py-2 font-mono text-sm ${
-            nameReadOnly
-              ? 'border-zinc-800 bg-zinc-900/50 text-zinc-500'
-              : 'border-zinc-700 bg-zinc-900 text-zinc-100'
-          }`}
+          className={cn(fieldClass, 'font-mono', nameReadOnly && 'cursor-not-allowed opacity-60')}
         />
         {fieldError(errors, 'name') && (
-          <p className="mt-1 text-xs text-red-400">{fieldError(errors, 'name')}</p>
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldError(errors, 'name')}</p>
         )}
       </div>
       <div>
-        <label className="text-xs text-zinc-500">description</label>
+        <label className={cn('text-xs', ui.muted)}>description</label>
         <textarea
           value={frontmatter.description}
           onChange={(e) => onChange({ ...frontmatter, description: e.target.value })}
           rows={3}
-          className="mt-1 w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+          className={cn(fieldClass, 'resize-y')}
         />
         {fieldError(errors, 'description') && (
-          <p className="mt-1 text-xs text-red-400">{fieldError(errors, 'description')}</p>
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldError(errors, 'description')}</p>
         )}
       </div>
       <div>
-        <label className="text-xs text-zinc-500">paths（可选，逗号分隔）</label>
+        <label className={cn('text-xs', ui.muted)}>paths（可选，逗号分隔）</label>
         <input
           type="text"
           value={pathsValue}
@@ -59,10 +58,10 @@ export function FrontmatterForm({ frontmatter, onChange, errors, nameReadOnly = 
               paths: raw ? raw.split(',').map((p) => p.trim()) : undefined,
             });
           }}
-          className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+          className={fieldClass}
         />
       </div>
-      <label className="flex items-center gap-2 text-sm text-zinc-400">
+      <label className={cn('flex items-center gap-2 text-sm', ui.muted)}>
         <input
           type="checkbox"
           checked={Boolean(frontmatter['disable-model-invocation'])}
@@ -72,7 +71,7 @@ export function FrontmatterForm({ frontmatter, onChange, errors, nameReadOnly = 
               'disable-model-invocation': e.target.checked || undefined,
             })
           }
-          className="rounded border-zinc-600"
+          className={cn('rounded', ui.input)}
         />
         disable-model-invocation
       </label>
