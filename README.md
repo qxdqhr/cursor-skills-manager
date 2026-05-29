@@ -1,6 +1,6 @@
 # Cursor Skills Manager
 
-基于 `~/.cursor/skills` Git 主库的 Skill 管理工具（**v0.3 多 Agent 统一**）。
+基于 `~/.cursor/skills` Git 主库的 Skill 管理工具（**v0.3 多 Agent + v0.2 元数据**）。
 
 **技术栈**：Vite + React（Web）· Hono（API）· Electron（Desktop）· `packages/core`（共享逻辑）
 
@@ -29,7 +29,11 @@ pnpm dev               # API :3847 + Web :5173
 - 浏览 / 搜索个人主库与项目 skill（项目只读）
 - 双栏编辑 SKILL.md（校验 + 预览）
 - Git 变更、diff、commit
-- **多平台 binding 检查**（Cursor / agents / OpenCode / Claude / Codex）
+- **标签 / 收藏**：详情页编辑逻辑元数据（`.csm/skills/*.json`）
+- **复制到主库**：项目只读 skill 一键复制
+- **重命名 / 移动 / 软删除**：主库 skill 目录操作
+- **导出清单**：`skills-inventory.md` / JSON
+- **安装社区 skill**：`skills-add.sh` 向导
 - **一键 publish / repair** symlink 到各 Agent 平台目录
 - 新建 / 删除个人 skill
 

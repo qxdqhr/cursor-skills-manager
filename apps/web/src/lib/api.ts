@@ -9,6 +9,7 @@ import type {
   SkillDetail,
   SkillFileEntry,
   SkillFrontmatter,
+  SkillLogicalMeta,
   SkillSummary,
   SkillsTree,
   ValidateResult,
@@ -95,6 +96,8 @@ export async function fetchSkills(params: {
   gitDirty?: boolean;
   platform?: PlatformId;
   bindingIssue?: boolean;
+  favorite?: boolean;
+  tag?: string;
 }): Promise<{ items: SkillSummary[]; total: number }> {
   const sp = new URLSearchParams();
   if (params.q) sp.set('q', params.q);
@@ -102,6 +105,8 @@ export async function fetchSkills(params: {
   if (params.gitDirty) sp.set('gitDirty', 'true');
   if (params.platform) sp.set('platform', params.platform);
   if (params.bindingIssue) sp.set('bindingIssue', 'true');
+  if (params.favorite) sp.set('favorite', 'true');
+  if (params.tag) sp.set('tag', params.tag);
   const qs = sp.toString();
   return request(`/skills${qs ? `?${qs}` : ''}`);
 }
@@ -116,6 +121,77 @@ export async function fetchSkillsTree(): Promise<SkillsTree> {
 
 export async function postIndexRebuild(): Promise<{ count: number; durationMs: number }> {
   return request('/index/rebuild', { method: 'POST' });
+}
+
+export type IndexHealthStatus = {
+  healthy: boolean;
+  needsRebuild: boolean;
+  schemaVersion: string | null;
+  builtAt: number | null;
+  indexCount: number;
+  scanCount: number;
+  drift: number;
+};
+
+export async function fetchIndexStatus(): Promise<IndexHealthStatus> {
+  return request<IndexHealthStatus>('/index/status');
+}
+
+export async function patchSkillMeta(
+  skillId: string,
+  patch: Partial<Omit<SkillLogicalMeta, 'skillId'>>,
+): Promise<SkillLogicalMeta> {
+  return request(`/skills/${encodeURIComponent(skillId)}/meta`, {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function postSkillRename(skillId: string, newName: string): Promise<SkillDetail> {
+  return request(`/skills/${encodeURIComponent(skillId)}/rename`, {
+    method: 'POST',
+    body: JSON.stringify({ newName }),
+  });
+}
+
+export async function postSkillMove(skillId: string, categoryPath: string): Promise<SkillDetail> {
+  return request(`/skills/${encodeURIComponent(skillId)}/move`, {
+    method: 'POST',
+    body: JSON.stringify({ categoryPath }),
+  });
+}
+
+export async function postCopyToPersonal(body: {
+  sourceSkillId: string;
+  categoryPath?: string;
+  name?: string;
+}): Promise<SkillDetail> {
+  return request('/skills/copy-to-personal', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function fetchExportInventory(params: {
+  format?: 'md' | 'json';
+  write?: boolean;
+}): Promise<{ format: string; content: string; path?: string }> {
+  const sp = new URLSearchParams();
+  if (params.format) sp.set('format', params.format);
+  if (params.write) sp.set('write', 'true');
+  const qs = sp.toString();
+  return request(`/export/inventory${qs ? `?${qs}` : ''}`);
+}
+
+export async function postSkillsAdd(args: string[]): Promise<{
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}> {
+  return request('/integrations/skills-add', {
+    method: 'POST',
+    body: JSON.stringify({ args }),
+  });
 }
 
 export async function fetchSkillDetail(skillId: string): Promise<SkillDetail> {

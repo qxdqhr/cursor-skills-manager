@@ -21,6 +21,7 @@
     "verify:m7": "pnpm --filter @csm/core build && node scripts/verify-m7.mjs",
     "verify:m8": "pnpm --filter @csm/core build && node scripts/verify-m8.mjs",
     "verify:m9": "pnpm --filter @csm/core build && node scripts/verify-m9.mjs",
+    "verify:v2": "pnpm --filter @csm/core build && node scripts/verify-v2.mjs",
     "smoke": "bash scripts/smoke.sh",
     "lint": "eslint ."
   },

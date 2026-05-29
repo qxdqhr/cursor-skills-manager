@@ -113,3 +113,37 @@ export async function openPersonalRoot(
   await openFolderInFileManager(personalRoot, { fileManager });
   return { opened: personalRoot };
 }
+
+export async function runSkillsAddScript(
+  personalRoot: string,
+  args: string[],
+): Promise<ScriptRunResult> {
+  const script = join(personalRoot, 'scripts/skills-add.sh');
+  if (!existsSync(script)) {
+    return {
+      exitCode: 1,
+      stdout: '',
+      stderr: `Script not found: ${script}`,
+    };
+  }
+
+  try {
+    const { stdout, stderr } = await execFileAsync('bash', [script, ...args], {
+      cwd: personalRoot,
+      maxBuffer: 20 * 1024 * 1024,
+      env: {
+        ...process.env,
+        CURSOR_SKILLS: personalRoot,
+        AGENTS_SKILLS: process.env.AGENTS_SKILLS ?? join(process.env.HOME ?? '', '.agents/skills'),
+      },
+    });
+    return { exitCode: 0, stdout, stderr };
+  } catch (e: unknown) {
+    const err = e as { code?: number; stdout?: string; stderr?: string; message?: string };
+    return {
+      exitCode: typeof err.code === 'number' ? err.code : 1,
+      stdout: err.stdout ?? '',
+      stderr: err.stderr ?? err.message ?? String(e),
+    };
+  }
+}

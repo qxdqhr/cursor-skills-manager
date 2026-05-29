@@ -6,6 +6,8 @@ import {
   postPlatformPublish,
   postPlatformRepair,
   postOpenTarget,
+  postSkillMove,
+  postSkillRename,
 } from '../lib/api.js';
 import { cn, ui } from '../lib/ui.js';
 import type {
@@ -16,6 +18,7 @@ import type {
 } from '../types.js';
 import { PlatformBindingBadges } from './PlatformBindingBadges.js';
 import { PublishPlatformsModal } from './SyncAgentsModal.js';
+import { SkillMetaEditor } from './SkillMetaEditor.js';
 
 const PLATFORM_I18N: Record<PlatformId, string> = {
   cursor: 'platforms.cursor',
@@ -29,10 +32,16 @@ export function SkillDetailPanel({
   skill,
   onEdit,
   onBindingsChanged,
+  onMetaUpdated,
+  onCopyToPersonal,
+  onRenamed,
 }: {
   skill: SkillSummary | null;
   onEdit?: (skillId: string) => void;
   onBindingsChanged?: () => void;
+  onMetaUpdated?: () => void;
+  onCopyToPersonal?: () => void;
+  onRenamed?: (skillId: string) => void;
 }) {
   const { t } = useTranslation();
   const [platforms, setPlatforms] = useState<PlatformDefinition[]>([]);
@@ -104,11 +113,54 @@ export function SkillDetailPanel({
       <div className="flex h-full flex-col overflow-y-auto p-4">
         <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">{skill.name}</h2>
         <p className={cn(ui.muted, 'mt-1 font-mono text-xs')}>{skill.skillId}</p>
-        {skill.readOnly && (
-          <p className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-            {t('skills.projectReadOnlyHint')}
-          </p>
-        )}
+      {skill.readOnly && (
+        <p className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+          {t('skills.projectReadOnlyHint')}
+        </p>
+      )}
+      {skill.source === 'project' && (
+        <button
+          type="button"
+          onClick={onCopyToPersonal}
+          className={cn(ui.btnPrimary, 'mt-3 w-full text-sm')}
+        >
+          {t('copy.title')}
+        </button>
+      )}
+      {skill.source === 'personal' && !skill.readOnly && (
+        <div className="mt-3 flex gap-2">
+          <button
+            type="button"
+            className={cn(ui.btn, 'flex-1 text-xs')}
+            onClick={() => {
+              const newName = window.prompt(t('rename.prompt'), skill.name);
+              if (!newName || newName === skill.name) return;
+              void postSkillRename(skill.skillId, newName)
+                .then((d) => onRenamed?.(d.skillId))
+                .catch((e) =>
+                  alert(e instanceof ApiClientError ? e.message : t('rename.failed')),
+                );
+            }}
+          >
+            {t('rename.action')}
+          </button>
+          <button
+            type="button"
+            className={cn(ui.btn, 'flex-1 text-xs')}
+            onClick={() => {
+              const categoryPath = window.prompt(t('move.prompt'), skill.categoryPath);
+              if (categoryPath === null) return;
+              void postSkillMove(skill.skillId, categoryPath)
+                .then((d) => onRenamed?.(d.skillId))
+                .catch((e) =>
+                  alert(e instanceof ApiClientError ? e.message : t('move.failed')),
+                );
+            }}
+          >
+            {t('move.action')}
+          </button>
+        </div>
+      )}
         <div className="mt-4 flex flex-col gap-2">
           {!skill.readOnly && skill.source === 'personal' && onEdit && (
             <button
@@ -151,6 +203,9 @@ export function SkillDetailPanel({
           <Row label={t('skills.path')} value={skill.skillMdPath} mono />
           <Row label={t('skills.category')} value={skill.categoryPath || '—'} />
         </dl>
+        {skill.source === 'personal' && (
+          <SkillMetaEditor skill={skill} onUpdated={onMetaUpdated} />
+        )}
         {skill.bindings && skill.bindings.length > 0 && (
           <div className="mt-4">
             <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">

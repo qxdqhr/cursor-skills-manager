@@ -6,6 +6,7 @@ import {
   saveConfig,
   searchSkillIds,
   gitDirtySkillIds,
+  isIndexHealthy,
   type CsmConfig,
 } from '@csm/core';
 import { existsSync } from 'node:fs';
@@ -25,9 +26,16 @@ import {
   putSkill,
   removeSkill,
   validateSkillDraft,
+  renameSkill,
+  moveSkill,
+  copySkillToPersonalLibrary,
+  getSkillMeta,
+  patchSkillMeta,
 } from './services/skillWrite.js';
+import { exportInventory } from './services/export.js';
+import { getIndexHealth } from './services/indexHealth.js';
 import { getGitDiff, getGitLog, getGitStatus, postGitCommit } from './services/git.js';
-import { getAgentsLinks, openTarget, syncAgents } from './services/integrations.js';
+import { getAgentsLinks, openTarget, syncAgents, skillsAdd } from './services/integrations.js';
 import { listPlatformBindings, listPlatforms, publishPlatformSkills, repairPlatformSkills, syncPlatforms } from './services/platforms.js';
 
 type Env = { Variables: { ctx: AppContext } };
@@ -71,7 +79,7 @@ export function createApp() {
       personalRootExists: rootExists,
       isGitRepo,
       hasToken: Boolean(ctx.config.api.token),
-      indexOk: true,
+      indexOk: isIndexHealthy(ctx.db),
     });
   });
 
@@ -103,6 +111,8 @@ export function createApp() {
     const source = c.req.query('source');
     const platform = c.req.query('platform')?.trim();
     const bindingIssue = c.req.query('bindingIssue') === 'true';
+    const favorite = c.req.query('favorite') === 'true';
+    const tag = c.req.query('tag')?.trim();
     const { all, personal } = await loadAllSkills(ctx.config);
     const dirtySet = await gitDirtySkillIds(ctx.config.paths.personalRoot, personal);
     let items = filterBySource(all, source).map((s) =>
@@ -125,6 +135,14 @@ export function createApp() {
       items = items.filter((s) => s.platforms?.includes(platform as import('@csm/core').PlatformId));
     }
 
+    if (favorite) {
+      items = items.filter((s) => s.meta?.favorite);
+    }
+
+    if (tag) {
+      items = items.filter((s) => s.meta?.tags?.includes(tag));
+    }
+
     if (q) {
       const hits = searchSkillIds(ctx.db, q);
       const idSet = new Set(hits.map((h) => h.skillId));
@@ -132,7 +150,12 @@ export function createApp() {
       const scoreMap = new Map(hits.map((h) => [h.skillId, h.score]));
       items.sort((a, b) => (scoreMap.get(b.skillId) ?? 0) - (scoreMap.get(a.skillId) ?? 0));
     } else {
-      items.sort((a, b) => a.name.localeCompare(b.name));
+      items.sort((a, b) => {
+        const fa = a.meta?.favorite ? 1 : 0;
+        const fb = b.meta?.favorite ? 1 : 0;
+        if (fb !== fa) return fb - fa;
+        return a.name.localeCompare(b.name);
+      });
     }
 
     return jsonOk(c, { items, total: items.length });
@@ -209,6 +232,62 @@ export function createApp() {
     return jsonOk(c, result);
   });
 
+  app.post('/skills/:skillId/rename', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const body = (await c.req.json()) as { newName: string };
+    const detail = await renameSkill(ctx, skillId, body.newName);
+    return jsonOk(c, detail);
+  });
+
+  app.post('/skills/:skillId/move', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const body = (await c.req.json()) as { categoryPath: string };
+    const detail = await moveSkill(ctx, skillId, body.categoryPath);
+    return jsonOk(c, detail);
+  });
+
+  app.post('/skills/copy-to-personal', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as {
+      sourceSkillId: string;
+      categoryPath?: string;
+      name?: string;
+    };
+    const detail = await copySkillToPersonalLibrary(ctx, body);
+    return c.json({ ok: true, data: detail }, 201);
+  });
+
+  app.get('/skills/:skillId/meta', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const meta = await getSkillMeta(ctx.config, skillId);
+    return jsonOk(c, meta);
+  });
+
+  app.patch('/skills/:skillId/meta', async (c) => {
+    const ctx = c.get('ctx');
+    const skillId = c.req.param('skillId');
+    const body = (await c.req.json()) as Partial<import('@csm/core').SkillLogicalMeta>;
+    const meta = await patchSkillMeta(ctx.config, skillId, body);
+    return jsonOk(c, meta);
+  });
+
+  app.get('/export/inventory', async (c) => {
+    const ctx = c.get('ctx');
+    const format = c.req.query('format') === 'json' ? 'json' : 'md';
+    const writeFile = c.req.query('write') === 'true';
+    const data = await exportInventory(ctx.config, format, writeFile);
+    return jsonOk(c, data);
+  });
+
+  app.get('/index/status', async (c) => {
+    const ctx = c.get('ctx');
+    const data = await getIndexHealth(ctx);
+    return jsonOk(c, data);
+  });
+
   app.get('/search', async (c) => {
     const ctx = c.get('ctx');
     const q = c.req.query('q')?.trim() ?? '';
@@ -270,6 +349,13 @@ export function createApp() {
   app.post('/integrations/sync-agents', async (c) => {
     const ctx = c.get('ctx');
     const data = await syncAgents(ctx.config);
+    return jsonOk(c, data);
+  });
+
+  app.post('/integrations/skills-add', async (c) => {
+    const ctx = c.get('ctx');
+    const body = (await c.req.json()) as { args?: string[] };
+    const data = await skillsAdd(ctx.config, body.args ?? []);
     return jsonOk(c, data);
   });
 

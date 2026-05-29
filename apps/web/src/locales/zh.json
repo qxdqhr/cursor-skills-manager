@@ -11,6 +11,8 @@
     "new": "新建",
     "syncAgents": "同步 agents",
     "publishPlatforms": "发布到平台",
+    "skillsAdd": "安装 skill",
+    "exportMd": "导出清单",
     "git": "Git",
     "close": "关闭"
   },
@@ -50,6 +52,7 @@
     "invalidOnly": "校验失败",
     "scriptsOnly": "含 scripts",
     "bindingIssueOnly": "平台绑定异常",
+    "favoriteOnly": "收藏",
     "agentsIssueOnly": "agents 异常",
     "searchChip": "搜索：{{q}}",
     "categoryChip": "分类：{{path}}"
@@ -144,6 +147,7 @@
     "saving": "保存中…",
     "delete": "删除",
     "deleteConfirm": "确定删除 skill「{{name}}」？此操作不可恢复（硬删除）。",
+    "deleteSoftConfirm": "将「{{name}}」移至 .csm/trash（软删除）？取消可继续硬删除。",
     "fixValidation": "请先修复校验错误",
     "saved": "已保存",
     "saveFailed": "保存失败",
@@ -207,6 +211,50 @@
     "forceConfirm": "是否强制处理可安全替换的冲突？",
     "conflictGeneric": "存在无法自动处理的冲突",
     "conflictsRemain": "仍有 {{count}} 项冲突未解决"
+  },
+  "meta": {
+    "title": "标签与收藏",
+    "favorite": "收藏（列表置顶）",
+    "tags": "标签",
+    "note": "备注",
+    "saveFailed": "保存元数据失败"
+  },
+  "copy": {
+    "title": "复制到主库",
+    "hint": "从项目 skill「{{name}}」复制到 ~/.cursor/skills",
+    "name": "name（可选）",
+    "category": "categoryPath（可选）",
+    "cancel": "取消",
+    "confirm": "复制",
+    "running": "复制中…",
+    "failed": "复制失败"
+  },
+  "rename": {
+    "prompt": "新 name（目录名）",
+    "action": "重命名",
+    "failed": "重命名失败"
+  },
+  "move": {
+    "prompt": "目标 categoryPath（空=根目录）",
+    "action": "移动",
+    "failed": "移动失败"
+  },
+  "skillsAdd": {
+    "title": "安装社区 skill",
+    "hint": "参数传给 scripts/skills-add.sh（空格分隔）",
+    "running": "运行中…",
+    "noOutput": "（尚无输出）",
+    "exitCode": "脚本退出码 {{code}}",
+    "failed": "安装失败",
+    "start": "开始安装",
+    "cancel": "取消"
+  },
+  "index": {
+    "drift": "索引与扫描相差 {{count}} 条",
+    "rebuild": "重建索引",
+    "rebuildFailed": "索引重建失败",
+    "exported": "已导出：{{path}}",
+    "exportFailed": "导出失败"
   },
   "files": {
     "loading": "加载文件列表…",

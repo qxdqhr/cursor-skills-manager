@@ -19,7 +19,9 @@ import { NewSkillDialog } from '../components/NewSkillDialog.js';
 import { GitPanel } from '../components/GitPanel.js';
 import { SyncAgentsModal as PublishPlatformsModal } from '../components/SyncAgentsModal.js';
 import { useDebounce } from '../hooks/useDebounce.js';
-import { ApiClientError, fetchSkills, fetchSkillsTree } from '../lib/api.js';
+import { CopyToPersonalDialog } from '../components/CopyToPersonalDialog.js';
+import { SkillsAddModal } from '../components/SkillsAddModal.js';
+import { ApiClientError, fetchSkills, fetchSkillsTree, fetchIndexStatus, postIndexRebuild, fetchExportInventory } from '../lib/api.js';
 import { getStoredToken } from '../lib/token.js';
 import { cn, ui } from '../lib/ui.js';
 import { normalizeSkillsTree } from '../lib/categories.js';
@@ -41,6 +43,7 @@ function matchesQuickFilters(skill: SkillSummary, filters: SkillQuickFilters): b
   if (filters.invalidOnly && skill.validation.ok) return false;
   if (filters.scriptsOnly && !skill.hasScripts) return false;
   if (filters.bindingIssueOnly && !skill.bindings?.some((b) => !b.ok && b.issue)) return false;
+  if (filters.favoriteOnly && !skill.meta?.favorite) return false;
   return true;
 }
 
@@ -67,6 +70,9 @@ export function SkillsPage({
   const [quickFilters, setQuickFilters] = useState<SkillQuickFilters>(EMPTY_QUICK_FILTERS);
   const [gitOpen, setGitOpen] = useState(false);
   const [syncOpen, setSyncOpen] = useState(false);
+  const [skillsAddOpen, setSkillsAddOpen] = useState(false);
+  const [copySkill, setCopySkill] = useState<SkillSummary | null>(null);
+  const [indexDrift, setIndexDrift] = useState<number | null>(null);
   const [treeSelection, setTreeSelection] = useState<TreeSelection>({ type: 'all' });
   const [tree, setTree] = useState<SkillsTree | null>(null);
   const [items, setItems] = useState<SkillSummary[]>([]);
@@ -92,6 +98,7 @@ export function SkillsPage({
         source: sourceParam,
         gitDirty: quickFilters.gitDirtyOnly || undefined,
         bindingIssue: quickFilters.bindingIssueOnly || undefined,
+        favorite: quickFilters.favoriteOnly || undefined,
       });
       setItems(list);
     } catch (e) {
@@ -106,7 +113,14 @@ export function SkillsPage({
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, source, quickFilters.gitDirtyOnly, quickFilters.bindingIssueOnly, t]);
+  }, [debouncedQuery, source, quickFilters.gitDirtyOnly, quickFilters.bindingIssueOnly, quickFilters.favoriteOnly, t]);
+
+  useEffect(() => {
+    if (!getStoredToken()) return;
+    fetchIndexStatus()
+      .then((s) => setIndexDrift(s.needsRebuild ? s.drift : null))
+      .catch(() => setIndexDrift(null));
+  }, [items.length]);
 
   useEffect(() => {
     if (!getStoredToken()) return;
@@ -137,12 +151,38 @@ export function SkillsPage({
   const treeLabel = treeFilterLabel(treeSelection, t);
   const quickFilterCount = countActiveQuickFilters(quickFilters);
 
+  async function handleRebuildIndex() {
+    try {
+      await postIndexRebuild();
+      setIndexDrift(null);
+      load();
+    } catch (e) {
+      setToast(e instanceof ApiClientError ? e.message : t('index.rebuildFailed'));
+    }
+  }
+
+  async function handleExport(format: 'md' | 'json') {
+    try {
+      const data = await fetchExportInventory({ format, write: true });
+      setToast(t('index.exported', { path: data.path ?? format }));
+    } catch (e) {
+      setToast(e instanceof ApiClientError ? e.message : t('index.exportFailed'));
+    }
+  }
+
   return (
     <>
       <AppLayout
         onOpenSettings={onOpenSettings}
         headerActions={
           <>
+            <button
+              type="button"
+              onClick={() => setSkillsAddOpen(true)}
+              className={cn(ui.btn, 'transition-transform active:scale-[0.96]')}
+            >
+              {t('nav.skillsAdd')}
+            </button>
             <button
               type="button"
               onClick={() => setSyncOpen(true)}
@@ -187,6 +227,13 @@ export function SkillsPage({
                 </button>
                 <button
                   type="button"
+                  onClick={() => void handleExport('md')}
+                  className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-400"
+                >
+                  {t('nav.exportMd')}
+                </button>
+                <button
+                  type="button"
                   onClick={() => load()}
                   className="text-emerald-600 transition-transform hover:text-emerald-500 active:scale-[0.96] dark:text-emerald-500 dark:hover:text-emerald-400"
                 >
@@ -194,6 +241,14 @@ export function SkillsPage({
                 </button>
               </div>
             </div>
+            {indexDrift !== null && indexDrift > 0 && (
+              <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md bg-amber-100 px-2 py-1.5 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+                <span>{t('index.drift', { count: indexDrift })}</span>
+                <button type="button" onClick={() => void handleRebuildIndex()} className="underline">
+                  {t('index.rebuild')}
+                </button>
+              </div>
+            )}
             {(treeLabel || quickFilterCount > 0 || debouncedQuery) && (
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 {debouncedQuery && (
@@ -226,6 +281,12 @@ export function SkillsPage({
                     onRemove={() => setQuickFilters((f) => ({ ...f, scriptsOnly: false }))}
                   />
                 )}
+                {quickFilters.favoriteOnly && (
+                  <FilterChip
+                    label={t('filters.favoriteOnly')}
+                    onRemove={() => setQuickFilters((f) => ({ ...f, favoriteOnly: false }))}
+                  />
+                )}
                 {quickFilters.bindingIssueOnly && (
                   <FilterChip
                     label={t('filters.bindingIssueOnly')}
@@ -244,6 +305,12 @@ export function SkillsPage({
               onEditSkill(id);
             }}
             onBindingsChanged={() => load()}
+            onMetaUpdated={() => load()}
+            onCopyToPersonal={() => selected && setCopySkill(selected)}
+            onRenamed={(id) => {
+              load();
+              onEditSkill(id);
+            }}
           />
         }
       >
@@ -258,6 +325,16 @@ export function SkillsPage({
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <GitPanel open={gitOpen} onClose={() => setGitOpen(false)} onCommitted={() => load()} />
       <PublishPlatformsModal open={syncOpen} onClose={() => setSyncOpen(false)} onDone={() => load()} />
+      <SkillsAddModal open={skillsAddOpen} onClose={() => setSkillsAddOpen(false)} onDone={() => load()} />
+      <CopyToPersonalDialog
+        open={Boolean(copySkill)}
+        skill={copySkill}
+        onClose={() => setCopySkill(null)}
+        onCopied={(id) => {
+          load();
+          onEditSkill(id);
+        }}
+      />
       <NewSkillDialog
         open={newOpen}
         onClose={() => setNewOpen(false)}

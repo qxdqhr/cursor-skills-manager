@@ -1,6 +1,6 @@
-import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import type { SkillFrontmatter, SkillSummary } from './types.js';
 import { assertInsideRoot, toPosixPath } from './paths.js';
 import { parseSkillMdFile } from './parse.js';
@@ -9,6 +9,7 @@ import { validateSkill } from './validate.js';
 import { buildSkillId, skillNameFromDir } from './skillId.js';
 import { scanPersonalSkillAt } from './scan.js';
 import { SkillValidationError, SkillWriteError } from './skillErrors.js';
+import { deleteSkillMeta, renameSkillMetaFile } from './skillMeta.js';
 
 const SKIP_FILE_NAMES = new Set(['SKILL.md', '.DS_Store']);
 const SKIP_DIR_NAMES = new Set(['.git', 'node_modules']);
@@ -164,10 +165,122 @@ export async function deletePersonalSkill(
     await mkdir(trashRoot, { recursive: true });
     const dest = join(trashRoot, `${Date.now()}-${name}`);
     await rename(skillDir, dest);
+    await deleteSkillMeta(personalRoot, skillId);
     return;
   }
 
+  await deleteSkillMeta(personalRoot, skillId);
   await rm(skillDir, { recursive: true, force: true });
+}
+
+export async function renamePersonalSkill(
+  personalRoot: string,
+  skillId: string,
+  newName: string,
+  opts?: { reservedDirNames?: string[]; agentsRoot?: string },
+): Promise<SkillSummary> {
+  const name = newName.trim();
+  const skillDir = resolvePersonalSkillDir(personalRoot, skillId);
+  const parsed = await parseSkillMdFile(join(skillDir, 'SKILL.md'));
+  const validation = validateSkill({
+    directoryName: name,
+    frontmatter: { ...parsed.frontmatter, name },
+    bodyMarkdown: parsed.bodyMarkdown,
+  });
+  if (!validation.ok) {
+    throw new SkillValidationError(validation.errors);
+  }
+
+  const parent = dirname(skillDir);
+  const dest = assertInsideRoot(join(parent, name), personalRoot);
+  if (existsSync(dest)) {
+    throw new SkillWriteError(`Target already exists: ${name}`, 'CONFLICT');
+  }
+
+  parsed.frontmatter.name = name;
+  await writeSkillMdAtomic(join(skillDir, 'SKILL.md'), parsed.frontmatter, parsed.bodyMarkdown);
+  await rename(skillDir, dest);
+
+  const newSkillId = buildSkillIdFromDir(personalRoot, dest);
+  await renameSkillMetaFile(personalRoot, skillId, newSkillId);
+
+  return scanPersonalSkillAt(personalRoot, dest, {
+    agentsRoot: opts?.agentsRoot,
+    checkAgents: Boolean(opts?.agentsRoot),
+  });
+}
+
+export async function movePersonalSkill(
+  personalRoot: string,
+  skillId: string,
+  categoryPath: string,
+  opts?: { reservedDirNames?: string[]; agentsRoot?: string },
+): Promise<SkillSummary> {
+  const category = categoryPath.trim().replace(/^\/+|\/+$/g, '');
+  assertWritableCategory(category, opts?.reservedDirNames);
+
+  const skillDir = resolvePersonalSkillDir(personalRoot, skillId);
+  const name = skillNameFromDir(skillDir);
+  const dest = assertInsideRoot(join(personalRoot, category, name), personalRoot);
+  if (existsSync(dest)) {
+    throw new SkillWriteError(`Target already exists: ${category}/${name}`, 'CONFLICT');
+  }
+
+  await mkdir(dirname(dest), { recursive: true });
+  await rename(skillDir, dest);
+
+  const newSkillId = buildSkillIdFromDir(personalRoot, dest);
+  await renameSkillMetaFile(personalRoot, skillId, newSkillId);
+
+  return scanPersonalSkillAt(personalRoot, dest, {
+    agentsRoot: opts?.agentsRoot,
+    checkAgents: Boolean(opts?.agentsRoot),
+  });
+}
+
+export async function copySkillToPersonal(input: {
+  personalRoot: string;
+  source: SkillSummary;
+  categoryPath?: string;
+  name?: string;
+  reservedDirNames?: string[];
+  agentsRoot?: string;
+}): Promise<SkillSummary> {
+  if (input.source.source !== 'project' && input.source.source !== 'personal') {
+    throw new SkillWriteError('Invalid source skill', 'PATH_FORBIDDEN');
+  }
+
+  const name = (input.name ?? input.source.name).trim();
+  const categoryPath = (input.categoryPath ?? '').trim().replace(/^\/+|\/+$/g, '');
+  assertWritableCategory(categoryPath, input.reservedDirNames);
+
+  const dest = assertInsideRoot(join(input.personalRoot, categoryPath, name), input.personalRoot);
+  if (existsSync(dest)) {
+    throw new SkillWriteError(`Skill directory already exists: ${name}`, 'CONFLICT');
+  }
+
+  const sourceDir = input.source.skillMdPath.replace(/\/SKILL\.md$/, '');
+  await mkdir(dirname(dest), { recursive: true });
+  await cp(sourceDir, dest, { recursive: true });
+
+  const skillMdPath = join(dest, 'SKILL.md');
+  const parsed = await parseSkillMdFile(skillMdPath);
+  parsed.frontmatter.name = name;
+  const validation = validateSkill({
+    directoryName: name,
+    frontmatter: parsed.frontmatter,
+    bodyMarkdown: parsed.bodyMarkdown,
+  });
+  if (!validation.ok) {
+    await rm(dest, { recursive: true, force: true });
+    throw new SkillValidationError(validation.errors);
+  }
+  await writeSkillMdAtomic(skillMdPath, parsed.frontmatter, parsed.bodyMarkdown);
+
+  return scanPersonalSkillAt(input.personalRoot, dest, {
+    agentsRoot: input.agentsRoot,
+    checkAgents: Boolean(input.agentsRoot),
+  });
 }
 
 export async function listSkillFiles(skillDir: string): Promise<SkillFileEntry[]> {

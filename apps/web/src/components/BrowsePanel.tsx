@@ -7,6 +7,7 @@ export type SkillQuickFilters = {
   invalidOnly: boolean;
   scriptsOnly: boolean;
   bindingIssueOnly: boolean;
+  favoriteOnly: boolean;
 };
 
 export const EMPTY_QUICK_FILTERS: SkillQuickFilters = {
@@ -14,6 +15,7 @@ export const EMPTY_QUICK_FILTERS: SkillQuickFilters = {
   invalidOnly: false,
   scriptsOnly: false,
   bindingIssueOnly: false,
+  favoriteOnly: false,
 };
 
 export function BrowsePanel({
@@ -36,6 +38,7 @@ export function BrowsePanel({
     { key: 'invalidOnly', label: t('filters.invalidOnly') },
     { key: 'scriptsOnly', label: t('filters.scriptsOnly') },
     { key: 'bindingIssueOnly', label: t('filters.bindingIssueOnly') },
+    { key: 'favoriteOnly', label: t('filters.favoriteOnly') },
   ];
 
   const activeCount = toggles.filter(({ key }) => filters[key]).length;

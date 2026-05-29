@@ -32,6 +32,16 @@ export interface PlatformsConfig {
   definitions: Partial<Record<PlatformId, Partial<Omit<PlatformDefinition, 'id'>>>>;
 }
 
+export interface SkillLogicalMeta {
+  skillId: string;
+  categories: string[];
+  tags: string[];
+  favorite: boolean;
+  note?: string;
+}
+
+export const PRESET_TAGS = ['android', 'rn', 'web', 'docs', 'git', 'design'] as const;
+
 export type { SkillTreeNode, SkillsTree } from './lib/categories.js';
 export { UNCATEGORIZED_CATEGORY_ID, matchesCategoryPath, normalizeSkillsTree } from './lib/categories.js';
 
@@ -59,6 +69,7 @@ export interface SkillSummary {
   agentsLink?: { exists: boolean; ok: boolean; target: string | null };
   bindings?: PlatformBindingStatus[];
   platforms?: PlatformId[];
+  meta?: SkillLogicalMeta;
 }
 
 export interface PublicConfig {

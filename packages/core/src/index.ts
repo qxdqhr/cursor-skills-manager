@@ -19,3 +19,7 @@ export * from './integrations.js';
 export * from './openDesktop.js';
 export * from './skillsTree.js';
 export * from './platforms/index.js';
+export * from './skillMeta.js';
+export * from './enrichMeta.js';
+export * from './exportInventory.js';
+export * from './indexStatus.js';

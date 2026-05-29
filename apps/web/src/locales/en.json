@@ -11,6 +11,8 @@
     "new": "New",
     "syncAgents": "Sync agents",
     "publishPlatforms": "Publish to platforms",
+    "skillsAdd": "Install skill",
+    "exportMd": "Export inventory",
     "git": "Git",
     "close": "Close"
   },
@@ -50,6 +52,7 @@
     "invalidOnly": "Invalid",
     "scriptsOnly": "Has scripts",
     "bindingIssueOnly": "Binding issue",
+    "favoriteOnly": "Favorites",
     "agentsIssueOnly": "Agents issue",
     "searchChip": "Search: {{q}}",
     "categoryChip": "Category: {{path}}"
@@ -143,7 +146,8 @@
     "save": "Save",
     "saving": "Saving…",
     "delete": "Delete",
-    "deleteConfirm": "Delete skill \"{{name}}\"? This cannot be undone (hard delete).",
+    "deleteConfirm": "确定删除 skill「{{name}}」？此操作不可恢复（硬删除）。",
+    "deleteSoftConfirm": "将「{{name}}」移至 .csm/trash（软删除）？取消可继续硬删除。",
     "fixValidation": "Fix validation errors first",
     "saved": "Saved",
     "saveFailed": "Save failed",
@@ -207,6 +211,50 @@
     "forceConfirm": "Force safe-to-replace conflicts?",
     "conflictGeneric": "Unresolved publish conflict",
     "conflictsRemain": "{{count}} conflict(s) remain"
+  },
+  "meta": {
+    "title": "Tags & favorite",
+    "favorite": "Favorite (pin in list)",
+    "tags": "Tags",
+    "note": "Note",
+    "saveFailed": "Failed to save meta"
+  },
+  "copy": {
+    "title": "Copy to personal library",
+    "hint": "Copy project skill \"{{name}}\" to ~/.cursor/skills",
+    "name": "name (optional)",
+    "category": "categoryPath (optional)",
+    "cancel": "Cancel",
+    "confirm": "Copy",
+    "running": "Copying…",
+    "failed": "Copy failed"
+  },
+  "rename": {
+    "prompt": "New name (directory)",
+    "action": "Rename",
+    "failed": "Rename failed"
+  },
+  "move": {
+    "prompt": "Target categoryPath (empty = root)",
+    "action": "Move",
+    "failed": "Move failed"
+  },
+  "skillsAdd": {
+    "title": "Install community skill",
+    "hint": "Arguments for scripts/skills-add.sh (space-separated)",
+    "running": "Running…",
+    "noOutput": "(no output yet)",
+    "exitCode": "Script exit code {{code}}",
+    "failed": "Install failed",
+    "start": "Install",
+    "cancel": "Cancel"
+  },
+  "index": {
+    "drift": "Index drift: {{count}} skill(s)",
+    "rebuild": "Rebuild index",
+    "rebuildFailed": "Index rebuild failed",
+    "exported": "Exported: {{path}}",
+    "exportFailed": "Export failed"
   },
   "files": {
     "loading": "Loading files…",

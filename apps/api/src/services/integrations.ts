@@ -3,12 +3,17 @@ import {
   listAgentsLinksHealth,
   openSkillTarget,
   runSyncAgentsScript,
+  runSkillsAddScript,
 } from '@csm/core';
 import { ApiError } from '../errors.js';
 import { loadAllSkills } from './skills.js';
 
 export async function syncAgents(config: CsmConfig) {
   return runSyncAgentsScript(config.paths.personalRoot);
+}
+
+export async function skillsAdd(config: CsmConfig, args: string[]) {
+  return runSkillsAddScript(config.paths.personalRoot, args);
 }
 
 export async function getAgentsLinks(config: CsmConfig) {

@@ -3,10 +3,14 @@ import {
   type SkillDetail,
   type SkillFrontmatter,
   type SkillSummary,
+  type SkillLogicalMeta,
   SkillValidationError,
   SkillWriteError,
   createPersonalSkill,
   deletePersonalSkill,
+  copySkillToPersonal,
+  renamePersonalSkill,
+  movePersonalSkill,
   indexDelete,
   indexUpsert,
   listSkillFiles,
@@ -17,6 +21,9 @@ import {
   resolvePersonalSkillDir,
   skillNameFromDir,
   openIndexDb,
+  loadSkillMeta,
+  saveSkillMeta,
+  deleteSkillMeta,
 } from '@csm/core';
 import { ApiError } from '../errors.js';
 import { loadAllSkills } from './skills.js';
@@ -161,4 +168,134 @@ export async function getSkillFilesFor(
   const skillDir = summary.skillMdPath.replace(/\/SKILL\.md$/, '');
   const files = await listSkillFiles(skillDir);
   return { files };
+}
+
+export async function renameSkill(
+  ctx: WriteCtx,
+  skillId: string,
+  newName: string,
+): Promise<SkillDetail> {
+  const summary = await findSkillSummary(ctx.config, skillId);
+  assertPersonalWritable(summary);
+  try {
+    const updated = await renamePersonalSkill(ctx.config.paths.personalRoot, summary.skillId, newName, {
+      reservedDirNames: ctx.config.reservedDirNames,
+      agentsRoot: ctx.config.paths.agentsRoot,
+    });
+    indexDelete(ctx.db, summary.skillId);
+    const dirtySet = await gitDirtySkillIds(ctx.config.paths.personalRoot, [updated]);
+    await indexUpsert(ctx.db, updated, dirtySet.has(updated.skillId));
+    const parsed = await parseSkillMdFile(updated.skillMdPath);
+    return { ...updated, frontmatter: parsed.frontmatter, bodyMarkdown: parsed.bodyMarkdown };
+  } catch (e) {
+    if (e instanceof SkillValidationError) {
+      throw new ApiError('VALIDATION_ERROR', 'Validation failed', { errors: e.errors });
+    }
+    if (e instanceof SkillWriteError) {
+      throw new ApiError(e.code === 'PATH_FORBIDDEN' ? 'FORBIDDEN' : 'CONFLICT', e.message);
+    }
+    throw e;
+  }
+}
+
+export async function moveSkill(
+  ctx: WriteCtx,
+  skillId: string,
+  categoryPath: string,
+): Promise<SkillDetail> {
+  const summary = await findSkillSummary(ctx.config, skillId);
+  assertPersonalWritable(summary);
+  try {
+    const updated = await movePersonalSkill(ctx.config.paths.personalRoot, summary.skillId, categoryPath, {
+      reservedDirNames: ctx.config.reservedDirNames,
+      agentsRoot: ctx.config.paths.agentsRoot,
+    });
+    indexDelete(ctx.db, summary.skillId);
+    const dirtySet = await gitDirtySkillIds(ctx.config.paths.personalRoot, [updated]);
+    await indexUpsert(ctx.db, updated, dirtySet.has(updated.skillId));
+    const parsed = await parseSkillMdFile(updated.skillMdPath);
+    return { ...updated, frontmatter: parsed.frontmatter, bodyMarkdown: parsed.bodyMarkdown };
+  } catch (e) {
+    if (e instanceof SkillValidationError) {
+      throw new ApiError('VALIDATION_ERROR', 'Validation failed', { errors: e.errors });
+    }
+    if (e instanceof SkillWriteError) {
+      throw new ApiError(e.code === 'PATH_FORBIDDEN' ? 'FORBIDDEN' : 'CONFLICT', e.message);
+    }
+    throw e;
+  }
+}
+
+export async function copySkillToPersonalLibrary(
+  ctx: WriteCtx,
+  body: { sourceSkillId: string; categoryPath?: string; name?: string },
+): Promise<SkillDetail> {
+  const source = await findSkillSummary(ctx.config, body.sourceSkillId);
+  if (source.source !== 'project') {
+    throw new ApiError('FORBIDDEN', 'Only project skills can be copied to personal library');
+  }
+  try {
+    const created = await copySkillToPersonal({
+      personalRoot: ctx.config.paths.personalRoot,
+      source,
+      categoryPath: body.categoryPath,
+      name: body.name,
+      reservedDirNames: ctx.config.reservedDirNames,
+      agentsRoot: ctx.config.paths.agentsRoot,
+    });
+    await indexUpsert(ctx.db, created, false);
+    const parsed = await parseSkillMdFile(created.skillMdPath);
+    return { ...created, frontmatter: parsed.frontmatter, bodyMarkdown: parsed.bodyMarkdown };
+  } catch (e) {
+    if (e instanceof SkillValidationError) {
+      throw new ApiError('VALIDATION_ERROR', 'Validation failed', { errors: e.errors });
+    }
+    if (e instanceof SkillWriteError) {
+      throw new ApiError(e.code === 'PATH_FORBIDDEN' ? 'FORBIDDEN' : 'CONFLICT', e.message);
+    }
+    throw e;
+  }
+}
+
+export async function getSkillMeta(
+  config: CsmConfig,
+  skillId: string,
+): Promise<SkillLogicalMeta> {
+  const summary = await findSkillSummary(config, skillId);
+  if (summary.source !== 'personal') {
+    throw new ApiError('FORBIDDEN', 'Meta is only for personal skills');
+  }
+  const meta = await loadSkillMeta(config.paths.personalRoot, summary.skillId);
+  return meta ?? { skillId: summary.skillId, categories: [], tags: [], favorite: false };
+}
+
+export async function patchSkillMeta(
+  config: CsmConfig,
+  skillId: string,
+  patch: Partial<Omit<SkillLogicalMeta, 'skillId'>>,
+): Promise<SkillLogicalMeta> {
+  const summary = await findSkillSummary(config, skillId);
+  if (summary.source !== 'personal') {
+    throw new ApiError('FORBIDDEN', 'Meta is only for personal skills');
+  }
+  const current =
+    (await loadSkillMeta(config.paths.personalRoot, summary.skillId)) ??
+    ({ skillId: summary.skillId, categories: [], tags: [], favorite: false } satisfies SkillLogicalMeta);
+  return saveSkillMeta(config.paths.personalRoot, {
+    ...current,
+    ...patch,
+    skillId: summary.skillId,
+  });
+}
+
+export async function removeSkillMeta(
+  config: CsmConfig,
+  skillId: string,
+): Promise<{ deleted: true }> {
+  const summary = await findSkillSummary(config, skillId);
+  if (summary.source !== 'personal') {
+    throw new ApiError('FORBIDDEN', 'Meta is only for personal skills');
+  }
+  await deleteSkillMeta(config.paths.personalRoot, summary.skillId);
+  return { deleted: true };
 }

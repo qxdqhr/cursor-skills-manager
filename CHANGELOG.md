@@ -6,6 +6,17 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-29 — 标签 / 元数据 / 工具链
+
+### Added
+
+- **v0.2**：`.csm/skills/*.json` 逻辑元数据（标签、收藏、备注）+ 详情页编辑
+- **v0.2**：`POST /skills/copy-to-personal`、`/rename`、`/move`；`DELETE ?mode=soft` 移至 `.csm/trash`
+- **v0.2**：`GET/PATCH /skills/:id/meta`；列表 `?favorite=` / `?tag=` 筛选与收藏置顶
+- **v0.2**：`GET /export/inventory`、`GET /index/status`；顶栏导出清单与索引漂移提示
+- **v0.2**：`POST /integrations/skills-add` + 安装向导 Modal
+- `pnpm verify:v2`
+
 ## [0.3.0] - 2026-05-29 — 多 Agent 统一
 
 ### Added

@@ -101,6 +101,16 @@ export function SkillEditorPage({ skillId, onBack, onSaved, onDeleted }: Props) 
 
   async function handleDelete() {
     if (!detail || detail.readOnly) return;
+    if (window.confirm(t('editor.deleteSoftConfirm', { name: detail.name }))) {
+      try {
+        await deleteSkill(skillId, 'soft');
+        onDeleted?.();
+        onBack();
+      } catch (e) {
+        setToast(e instanceof ApiClientError ? e.message : t('editor.deleteFailed'));
+      }
+      return;
+    }
     if (!confirm(t('editor.deleteConfirm', { name: detail.name }))) return;
     try {
       await deleteSkill(skillId, 'hard');

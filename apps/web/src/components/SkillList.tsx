@@ -71,6 +71,19 @@ export function SkillList({
                   {t('skills.readOnly')}
                 </span>
               )}
+              {skill.meta?.favorite && (
+                <span className="rounded bg-yellow-200 px-1.5 py-0.5 text-xs text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-200">
+                  ★
+                </span>
+              )}
+              {skill.meta?.tags?.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded bg-sky-200 px-1.5 py-0.5 text-xs text-sky-900 dark:bg-sky-900/40 dark:text-sky-200"
+                >
+                  {tag}
+                </span>
+              ))}
               {!skill.validation.ok && (
                 <span className="rounded bg-red-200 px-1.5 py-0.5 text-xs text-red-900 dark:bg-red-900/40 dark:text-red-200">
                   {t('skills.validationFailed')}

@@ -50,6 +50,7 @@ export interface SkillSummary {
   /** Platform ids with ok binding */
   platforms?: PlatformId[];
   git?: { dirty: boolean };
+  meta?: import('./skillMeta.js').SkillLogicalMeta;
 }
 
 export interface SkillDetail extends SkillSummary {
