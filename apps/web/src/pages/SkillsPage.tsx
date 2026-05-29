@@ -40,7 +40,7 @@ function matchesTree(skill: SkillSummary, sel: TreeSelection): boolean {
 function matchesQuickFilters(skill: SkillSummary, filters: SkillQuickFilters): boolean {
   if (filters.invalidOnly && skill.validation.ok) return false;
   if (filters.scriptsOnly && !skill.hasScripts) return false;
-  if (filters.agentsIssueOnly && !(skill.agentsLink && !skill.agentsLink.ok)) return false;
+  if (filters.bindingIssueOnly && !skill.bindings?.some((b) => !b.ok && b.issue)) return false;
   return true;
 }
 
@@ -91,6 +91,7 @@ export function SkillsPage({
         q: debouncedQuery || undefined,
         source: sourceParam,
         gitDirty: quickFilters.gitDirtyOnly || undefined,
+        bindingIssue: quickFilters.bindingIssueOnly || undefined,
       });
       setItems(list);
     } catch (e) {
@@ -105,7 +106,7 @@ export function SkillsPage({
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, source, quickFilters.gitDirtyOnly, t]);
+  }, [debouncedQuery, source, quickFilters.gitDirtyOnly, quickFilters.bindingIssueOnly, t]);
 
   useEffect(() => {
     if (!getStoredToken()) return;
@@ -225,10 +226,10 @@ export function SkillsPage({
                     onRemove={() => setQuickFilters((f) => ({ ...f, scriptsOnly: false }))}
                   />
                 )}
-                {quickFilters.agentsIssueOnly && (
+                {quickFilters.bindingIssueOnly && (
                   <FilterChip
-                    label={t('filters.agentsIssueOnly')}
-                    onRemove={() => setQuickFilters((f) => ({ ...f, agentsIssueOnly: false }))}
+                    label={t('filters.bindingIssueOnly')}
+                    onRemove={() => setQuickFilters((f) => ({ ...f, bindingIssueOnly: false }))}
                   />
                 )}
               </div>

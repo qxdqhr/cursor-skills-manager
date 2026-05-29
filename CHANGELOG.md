@@ -8,6 +8,11 @@
 
 ### Added
 
+- **M7**：多 Agent 平台注册表（cursor/agents/opencode/claude/codex）、`config.json` v2 自动迁移
+- **M7**：`checkPlatformBinding` / `SkillSummary.bindings[]` + SQLite `platform_bindings` 索引
+- **M7**：`GET /platforms`、`GET /platforms/:id/bindings`；`GET /skills?platform=&bindingIssue=`
+- **M7**：设置页平台开关与 globalRoot 展示；列表/详情 platform binding badges；「平台绑定异常」筛选
+- **M7**：`scripts/verify-m7.mjs`；core 单测（registry、checkBinding、config v2 迁移）
 - Web 三栏布局：浏览/列表/详情均可折叠、拖拽调宽，宽度持久化到 localStorage
 - 左侧「浏览与筛选」面板：分类树 + 多维快捷筛选（未提交、校验失败、scripts、agents 异常）
 - 列表区活跃筛选 chips，可逐项清除

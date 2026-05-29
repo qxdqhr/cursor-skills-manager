@@ -6,6 +6,7 @@ import {
   scanProjectSkills,
   parseSkillMdFile,
   buildSkillsTree,
+  enrichPersonalSkillsWithBindings,
   type SkillsTree,
   type SkillTreeNode,
 } from '@csm/core';
@@ -18,9 +19,9 @@ export async function loadAllSkills(config: CsmConfig): Promise<{
 }> {
   const personal = await scanPersonalSkills({
     root: config.paths.personalRoot,
-    agentsRoot: config.paths.agentsRoot,
-    checkAgents: true,
+    checkAgents: false,
   });
+  await enrichPersonalSkillsWithBindings(config, personal);
   const { skills: project } = await scanProjectSkills({
     globs: config.paths.projectScanGlobs,
   });

@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { ApiClientError, postOpenTarget } from '../lib/api.js';
 import { cn, ui } from '../lib/ui.js';
-import type { SkillSummary } from '../types.js';
+import type { PlatformBindingStatus, SkillSummary } from '../types.js';
+import { PlatformBindingBadges } from './PlatformBindingBadges.js';
 
 export function SkillDetailPanel({
   skill,
@@ -71,6 +72,18 @@ export function SkillDetailPanel({
         <Row label={t('skills.path')} value={skill.skillMdPath} mono />
         <Row label={t('skills.category')} value={skill.categoryPath || '—'} />
       </dl>
+      {skill.bindings && skill.bindings.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+            {t('skills.bindingsTitle')}
+          </h3>
+          <ul className="mt-2 space-y-2">
+            {skill.bindings.map((binding) => (
+              <BindingRow key={binding.platformId} binding={binding} />
+            ))}
+          </ul>
+        </div>
+      )}
       {!skill.validation.ok && (
         <div className="mt-4 rounded-lg border border-red-300 bg-red-50 p-3 dark:border-red-900/50 dark:bg-red-950/20">
           <p className="text-xs font-medium text-red-700 dark:text-red-300">{t('skills.validationFailed')}</p>
@@ -93,5 +106,39 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
         {value}
       </dd>
     </div>
+  );
+}
+
+const PLATFORM_I18N: Record<PlatformBindingStatus['platformId'], string> = {
+  cursor: 'platforms.cursor',
+  agents: 'platforms.agents',
+  opencode: 'platforms.opencode',
+  claude: 'platforms.claude',
+  codex: 'platforms.codex',
+};
+
+function BindingRow({ binding }: { binding: PlatformBindingStatus }) {
+  const { t } = useTranslation();
+  const label = t(PLATFORM_I18N[binding.platformId]);
+  const status = binding.ok
+    ? t('binding.ok', { platform: label })
+    : binding.issue
+      ? t(`binding.issue.${binding.issue}`)
+      : t('binding.unknown');
+
+  return (
+    <li className="rounded-lg border border-zinc-200/80 px-3 py-2 dark:border-zinc-800/80">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium text-zinc-800 dark:text-zinc-200">{label}</span>
+        <PlatformBindingBadges bindings={[binding]} issuesOnly={false} />
+      </div>
+      <p className={cn(ui.muted, 'mt-1 text-xs')}>{status}</p>
+      <p className={cn(ui.muted, 'mt-1 break-all font-mono text-[11px]')}>{binding.expectedPath}</p>
+      {binding.target && binding.target !== binding.expectedPath && (
+        <p className={cn(ui.muted, 'mt-1 break-all font-mono text-[11px]')}>
+          → {binding.target}
+        </p>
+      )}
+    </li>
   );
 }

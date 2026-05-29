@@ -3,6 +3,9 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { defaultAgentsRoot, defaultPersonalRoot, expandHome } from './paths.js';
+import { defaultPlatformsConfig, migratePlatformsFromV1 } from './platforms/registry.js';
+
+import type { PlatformsConfig } from './platforms/types.js';
 
 export type CsmLocale = 'zh' | 'en';
 export type CsmTheme = 'light' | 'dark' | 'system';
@@ -23,10 +26,11 @@ export interface CsmConfig {
     /** e.g. `dolphin` or `gio open` — overrides CSM_FILE_MANAGER */
     fileManager?: string;
   };
+  platforms?: PlatformsConfig;
   reservedDirNames?: string[];
 }
 
-const CONFIG_VERSION = 1;
+const CONFIG_VERSION = 2;
 
 export function csmDir(personalRoot: string): string {
   return join(personalRoot, '.csm');
@@ -64,8 +68,33 @@ export function defaultConfig(overrides?: Partial<CsmConfig>): CsmConfig {
       ...overrides?.paths,
     },
     reservedDirNames: ['scripts', '.git', '.csm'],
+    platforms: defaultPlatformsConfig(personalRoot),
     ...overrides,
   };
+}
+
+function normalizeConfig(parsed: CsmConfig, personalRoot: string): CsmConfig {
+  const base = defaultConfig({ paths: { personalRoot } });
+  const merged: CsmConfig = {
+    ...base,
+    ...parsed,
+    paths: {
+      ...base.paths,
+      ...parsed.paths,
+      personalRoot: expandHome(parsed.paths?.personalRoot ?? personalRoot),
+    },
+    api: {
+      ...base.api,
+      ...parsed.api,
+    },
+  };
+  if (!merged.platforms) {
+    merged.platforms = migratePlatformsFromV1(merged);
+  }
+  if ((parsed.version ?? 1) < CONFIG_VERSION) {
+    merged.version = CONFIG_VERSION;
+  }
+  return merged;
 }
 
 export async function loadConfig(personalRootInput?: string): Promise<CsmConfig> {
@@ -76,19 +105,7 @@ export async function loadConfig(personalRootInput?: string): Promise<CsmConfig>
   }
   const raw = await readFile(path, 'utf8');
   const parsed = JSON.parse(raw) as CsmConfig;
-  return {
-    ...defaultConfig({ paths: { personalRoot: root } }),
-    ...parsed,
-    paths: {
-      ...defaultConfig({ paths: { personalRoot: root } }).paths,
-      ...parsed.paths,
-      personalRoot: expandHome(parsed.paths?.personalRoot ?? root),
-    },
-    api: {
-      ...defaultConfig().api,
-      ...parsed.api,
-    },
-  };
+  return normalizeConfig(parsed, root);
 }
 
 /** 确保 .csm 目录与 config.json 存在，并生成 api.token */
@@ -129,6 +146,15 @@ export async function saveConfig(
     ...patch,
     api: { ...current.api, ...patch.api },
     paths: { ...current.paths, ...patch.paths },
+    platforms: patch.platforms
+      ? {
+          enabled: patch.platforms.enabled ?? current.platforms?.enabled ?? [],
+          definitions: {
+            ...current.platforms?.definitions,
+            ...patch.platforms.definitions,
+          },
+        }
+      : current.platforms,
   };
   await mkdir(csmDir(root), { recursive: true });
   await writeFile(configPath(root), `${JSON.stringify(next, null, 2)}\n`, 'utf8');

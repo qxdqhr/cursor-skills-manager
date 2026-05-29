@@ -2,6 +2,9 @@ import { getStoredToken } from './token.js';
 import type {
   ApiErrorBody,
   ApiOkBody,
+  PlatformDefinition,
+  PlatformId,
+  PlatformsConfig,
   PublicConfig,
   SkillDetail,
   SkillFileEntry,
@@ -78,6 +81,7 @@ export async function fetchConfig(): Promise<PublicConfig> {
 export async function patchConfig(patch: {
   locale?: 'zh' | 'en';
   theme?: 'light' | 'dark' | 'system';
+  platforms?: PlatformsConfig;
 }): Promise<PublicConfig> {
   return request<PublicConfig>('/config', {
     method: 'PATCH',
@@ -89,13 +93,21 @@ export async function fetchSkills(params: {
   q?: string;
   source?: string;
   gitDirty?: boolean;
+  platform?: PlatformId;
+  bindingIssue?: boolean;
 }): Promise<{ items: SkillSummary[]; total: number }> {
   const sp = new URLSearchParams();
   if (params.q) sp.set('q', params.q);
   if (params.source) sp.set('source', params.source);
   if (params.gitDirty) sp.set('gitDirty', 'true');
+  if (params.platform) sp.set('platform', params.platform);
+  if (params.bindingIssue) sp.set('bindingIssue', 'true');
   const qs = sp.toString();
   return request(`/skills${qs ? `?${qs}` : ''}`);
+}
+
+export async function fetchPlatforms(): Promise<{ items: PlatformDefinition[] }> {
+  return request<{ items: PlatformDefinition[] }>('/platforms');
 }
 
 export async function fetchSkillsTree(): Promise<SkillsTree> {

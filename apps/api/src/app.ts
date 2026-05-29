@@ -28,6 +28,7 @@ import {
 } from './services/skillWrite.js';
 import { getGitDiff, getGitLog, getGitStatus, postGitCommit } from './services/git.js';
 import { getAgentsLinks, openTarget, syncAgents } from './services/integrations.js';
+import { listPlatformBindings, listPlatforms } from './services/platforms.js';
 
 type Env = { Variables: { ctx: AppContext } };
 
@@ -100,6 +101,8 @@ export function createApp() {
     const ctx = c.get('ctx');
     const q = c.req.query('q')?.trim();
     const source = c.req.query('source');
+    const platform = c.req.query('platform')?.trim();
+    const bindingIssue = c.req.query('bindingIssue') === 'true';
     const { all, personal } = await loadAllSkills(ctx.config);
     const dirtySet = await gitDirtySkillIds(ctx.config.paths.personalRoot, personal);
     let items = filterBySource(all, source).map((s) =>
@@ -110,6 +113,16 @@ export function createApp() {
 
     if (c.req.query('gitDirty') === 'true') {
       items = items.filter((s) => s.git?.dirty);
+    }
+
+    if (bindingIssue) {
+      items = items.filter((s) =>
+        s.bindings?.some((b) => !b.ok && b.issue),
+      );
+    }
+
+    if (platform) {
+      items = items.filter((s) => s.platforms?.includes(platform as import('@csm/core').PlatformId));
     }
 
     if (q) {
@@ -263,6 +276,18 @@ export function createApp() {
   app.get('/integrations/agents-links', async (c) => {
     const ctx = c.get('ctx');
     const data = await getAgentsLinks(ctx.config);
+    return jsonOk(c, data);
+  });
+
+  app.get('/platforms', (c) => {
+    const ctx = c.get('ctx');
+    return jsonOk(c, listPlatforms(ctx.config));
+  });
+
+  app.get('/platforms/:platformId/bindings', async (c) => {
+    const ctx = c.get('ctx');
+    const platformId = c.req.param('platformId');
+    const data = await listPlatformBindings(ctx.config, platformId);
     return jsonOk(c, data);
   });
 

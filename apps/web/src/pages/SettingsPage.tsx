@@ -1,18 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ApiClientError, fetchConfig, fetchHealth } from '../lib/api.js';
+import { ApiClientError, fetchConfig, fetchHealth, fetchPlatforms, patchConfig } from '../lib/api.js';
 import { clearStoredToken, getStoredToken, setStoredToken } from '../lib/token.js';
 import { useAppPreferences } from '../context/AppPreferences.js';
 import { cn, ui } from '../lib/ui.js';
-import type { PublicConfig } from '../types.js';
+import type { PlatformDefinition, PlatformId, PublicConfig } from '../types.js';
+
+const PLATFORM_I18N: Record<PlatformId, string> = {
+  cursor: 'platforms.cursor',
+  agents: 'platforms.agents',
+  opencode: 'platforms.opencode',
+  claude: 'platforms.claude',
+  codex: 'platforms.codex',
+};
 
 export function SettingsPage({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const { locale, theme, setLocale, setTheme } = useAppPreferences();
   const [token, setToken] = useState(getStoredToken() ?? '');
   const [config, setConfig] = useState<PublicConfig | null>(null);
+  const [platforms, setPlatforms] = useState<PlatformDefinition[]>([]);
   const [health, setHealth] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [platformSaving, setPlatformSaving] = useState<PlatformId | null>(null);
   const [configVersion, setConfigVersion] = useState(0);
 
   useEffect(() => {
@@ -24,10 +34,14 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     if (!getStoredToken()) {
       setConfig(null);
+      setPlatforms([]);
       return;
     }
-    fetchConfig()
-      .then(setConfig)
+    Promise.all([fetchConfig(), fetchPlatforms()])
+      .then(([cfg, plats]) => {
+        setConfig(cfg);
+        setPlatforms(plats.items);
+      })
       .catch((e: unknown) => {
         if (e instanceof ApiClientError && e.status === 401) {
           setError(t('settings.invalidToken'));
@@ -39,6 +53,39 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
     setStoredToken(token);
     setConfigVersion((v) => v + 1);
     setError(null);
+  }
+
+  async function togglePlatform(platform: PlatformDefinition) {
+    if (platform.id === 'cursor') return;
+    setPlatformSaving(platform.id);
+    setError(null);
+    try {
+      const nextEnabled = platform.enabled
+        ? (config?.platforms?.enabled ?? platforms.filter((p) => p.enabled).map((p) => p.id)).filter(
+            (id) => id !== platform.id,
+          )
+        : [
+            ...new Set([
+              ...(config?.platforms?.enabled ?? platforms.filter((p) => p.enabled).map((p) => p.id)),
+              platform.id,
+            ]),
+          ];
+      const next = await patchConfig({
+        platforms: {
+          enabled: nextEnabled,
+          definitions: {
+            [platform.id]: { enabled: !platform.enabled },
+          },
+        },
+      });
+      setConfig(next);
+      const plats = await fetchPlatforms();
+      setPlatforms(plats.items);
+    } catch (e) {
+      setError(e instanceof ApiClientError ? e.message : t('common.loadFailed'));
+    } finally {
+      setPlatformSaving(null);
+    }
   }
 
   return (
@@ -98,6 +145,41 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
         </div>
         {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
       </section>
+
+      {platforms.length > 0 && (
+        <section className={cn(ui.panel, 'mt-6 space-y-4 p-5')}>
+          <h2 className="text-sm font-medium text-zinc-800 dark:text-zinc-300">{t('settings.platforms')}</h2>
+          <p className={cn(ui.muted, 'text-xs')}>{t('settings.platformsHint')}</p>
+          <ul className="space-y-3">
+            {platforms.map((platform) => (
+              <li
+                key={platform.id}
+                className="rounded-lg border border-zinc-200/80 px-3 py-3 dark:border-zinc-800/80"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-zinc-800 dark:text-zinc-200">
+                      {t(PLATFORM_I18N[platform.id])}
+                    </p>
+                    <p className={cn(ui.muted, 'mt-1 break-all font-mono text-[11px]')}>
+                      {t('settings.platformRoot')}: {platform.globalRoot}
+                    </p>
+                  </div>
+                  <label className="flex shrink-0 items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+                    <input
+                      type="checkbox"
+                      checked={platform.enabled}
+                      disabled={platform.id === 'cursor' || platformSaving === platform.id}
+                      onChange={() => void togglePlatform(platform)}
+                    />
+                    {t('settings.platformEnabled')}
+                  </label>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {config && (
         <section className={cn(ui.panel, 'mt-6 space-y-3 p-5 text-sm')}>

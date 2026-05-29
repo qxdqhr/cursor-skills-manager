@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { cn, ui } from '../lib/ui.js';
 import type { SkillSummary } from '../types.js';
+import { PlatformBindingBadges } from './PlatformBindingBadges.js';
 
 function formatTime(ms: number, locale: string): string {
   return new Date(ms).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US', {
@@ -85,11 +86,7 @@ export function SkillList({
                   {t('skills.uncommitted')}
                 </span>
               )}
-              {skill.agentsLink && !skill.agentsLink.ok && (
-                <span className="rounded bg-orange-200 px-1.5 py-0.5 text-xs text-orange-900 dark:bg-orange-900/40 dark:text-orange-200">
-                  {t('skills.agentsUnlinked')}
-                </span>
-              )}
+              <PlatformBindingBadges bindings={skill.bindings} />
             </div>
             <p className={cn(ui.muted, 'mt-1 line-clamp-2 text-sm')}>{skill.description}</p>
             <p className={cn(ui.muted, 'mt-1 font-mono text-xs')}>

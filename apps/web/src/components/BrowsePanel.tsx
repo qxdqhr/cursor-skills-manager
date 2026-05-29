@@ -6,14 +6,14 @@ export type SkillQuickFilters = {
   gitDirtyOnly: boolean;
   invalidOnly: boolean;
   scriptsOnly: boolean;
-  agentsIssueOnly: boolean;
+  bindingIssueOnly: boolean;
 };
 
 export const EMPTY_QUICK_FILTERS: SkillQuickFilters = {
   gitDirtyOnly: false,
   invalidOnly: false,
   scriptsOnly: false,
-  agentsIssueOnly: false,
+  bindingIssueOnly: false,
 };
 
 export function BrowsePanel({
@@ -35,7 +35,7 @@ export function BrowsePanel({
     { key: 'gitDirtyOnly', label: t('filters.gitDirtyOnly') },
     { key: 'invalidOnly', label: t('filters.invalidOnly') },
     { key: 'scriptsOnly', label: t('filters.scriptsOnly') },
-    { key: 'agentsIssueOnly', label: t('filters.agentsIssueOnly') },
+    { key: 'bindingIssueOnly', label: t('filters.bindingIssueOnly') },
   ];
 
   const activeCount = toggles.filter(({ key }) => filters[key]).length;

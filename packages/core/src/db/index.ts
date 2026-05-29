@@ -6,7 +6,7 @@ import type { SkillSummary } from '../types.js';
 import { parseSkillMdFile } from '../parse.js';
 import { indexDbPath } from '../config.js';
 
-const SCHEMA_VERSION = '1';
+const SCHEMA_VERSION = '2';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -132,6 +132,8 @@ export async function indexRebuild(
 
   run(skills);
 
+  indexPlatformBindings(db, skills);
+
   setIndexMeta(db, 'schema_version', SCHEMA_VERSION);
   setIndexMeta(db, 'built_at', String(Date.now()));
 
@@ -234,6 +236,7 @@ export async function indexUpsert(
 export function indexDelete(db: Database.Database, skillId: string): void {
   db.prepare('DELETE FROM skills_meta WHERE skill_id = ?').run(skillId);
   db.prepare('DELETE FROM skills_fts WHERE skill_id = ?').run(skillId);
+  db.prepare('DELETE FROM platform_bindings WHERE skill_id = ?').run(skillId);
 }
 
 export function filterSkillIds(
@@ -267,5 +270,58 @@ export function filterSkillIds(
   const rows = db
     .prepare(`SELECT skill_id FROM skills_meta ${where} ORDER BY name`)
     .all(...params) as { skill_id: string }[];
+  return rows.map((r) => r.skill_id);
+}
+
+function indexPlatformBindings(db: Database.Database, skills: SkillSummary[]): void {
+  db.exec('DELETE FROM platform_bindings');
+  const insert = db.prepare(`
+    INSERT INTO platform_bindings (skill_id, platform_id, skill_name, ok, issue, checked_at)
+    VALUES (@skill_id, @platform_id, @skill_name, @ok, @issue, @checked_at)
+  `);
+  const now = Date.now();
+  for (const skill of skills) {
+    if (!skill.bindings?.length) continue;
+    for (const binding of skill.bindings) {
+      insert.run({
+        skill_id: skill.skillId,
+        platform_id: binding.platformId,
+        skill_name: skill.name,
+        ok: binding.ok ? 1 : 0,
+        issue: binding.issue ?? null,
+        checked_at: now,
+      });
+    }
+  }
+}
+
+export function filterSkillIdsByPlatform(
+  db: Database.Database,
+  platformId: string,
+  opts?: { okOnly?: boolean },
+): string[] {
+  const okOnly = opts?.okOnly !== false;
+  const rows = db
+    .prepare(
+      `
+      SELECT skill_id FROM platform_bindings
+      WHERE platform_id = ? ${okOnly ? 'AND ok = 1' : ''}
+      ORDER BY skill_name
+    `,
+    )
+    .all(platformId) as { skill_id: string }[];
+  return rows.map((r) => r.skill_id);
+}
+
+export function filterSkillIdsWithBindingIssue(db: Database.Database): string[] {
+  const rows = db
+    .prepare(
+      `
+      SELECT DISTINCT skill_id FROM platform_bindings
+      WHERE ok = 0 AND issue IS NOT NULL
+      ORDER BY skill_id
+    `,
+    )
+    .all() as { skill_id: string }[];
   return rows.map((r) => r.skill_id);
 }

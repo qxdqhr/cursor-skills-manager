@@ -1,3 +1,5 @@
+import type { PlatformBindingStatus, PlatformId } from './platforms/types.js';
+
 export type SkillSource = 'personal' | 'project';
 
 export type ValidationErrorCode =
@@ -42,7 +44,11 @@ export interface SkillSummary {
   hasScripts: boolean;
   mtimeMs: number;
   validation: { ok: boolean; errors: ValidationError[] };
+  /** @deprecated use bindings for agents platform */
   agentsLink?: AgentsLinkStatus;
+  bindings?: PlatformBindingStatus[];
+  /** Platform ids with ok binding */
+  platforms?: PlatformId[];
   git?: { dirty: boolean };
 }
 

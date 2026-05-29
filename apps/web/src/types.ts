@@ -1,5 +1,35 @@
 export type SkillSource = 'personal' | 'project';
 
+export type PlatformId = 'cursor' | 'agents' | 'opencode' | 'claude' | 'codex';
+
+export type BindingIssue = 'missing' | 'wrong_target' | 'not_symlink';
+
+export interface PlatformBindingStatus {
+  platformId: PlatformId;
+  mode: 'none' | 'symlink' | 'mirror';
+  expectedPath: string;
+  exists: boolean;
+  ok: boolean;
+  target: string | null;
+  issue?: BindingIssue;
+}
+
+export interface PlatformDefinition {
+  id: PlatformId;
+  label: string;
+  globalRoot: string;
+  role: 'canonical' | 'target';
+  syncMode: 'none' | 'symlink' | 'mirror';
+  enabled: boolean;
+  publishFrom?: 'canonical';
+  alternateRoots?: string[];
+}
+
+export interface PlatformsConfig {
+  enabled: PlatformId[];
+  definitions: Partial<Record<PlatformId, Partial<Omit<PlatformDefinition, 'id'>>>>;
+}
+
 export type { SkillTreeNode, SkillsTree } from './lib/categories.js';
 export { UNCATEGORIZED_CATEGORY_ID, matchesCategoryPath, normalizeSkillsTree } from './lib/categories.js';
 
@@ -23,7 +53,10 @@ export interface SkillSummary {
   mtimeMs: number;
   validation: { ok: boolean; errors: ValidationError[] };
   git?: { dirty?: boolean };
+  /** @deprecated use bindings for agents platform */
   agentsLink?: { exists: boolean; ok: boolean; target: string | null };
+  bindings?: PlatformBindingStatus[];
+  platforms?: PlatformId[];
 }
 
 export interface PublicConfig {
@@ -37,6 +70,7 @@ export interface PublicConfig {
     projectScanGlobs?: string[];
     editor?: string;
   };
+  platforms?: PlatformsConfig;
 }
 
 export interface ApiErrorBody {

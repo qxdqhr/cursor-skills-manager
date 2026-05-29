@@ -151,6 +151,17 @@ Skill 支持 Cursor 官方约定的嵌套目录（如 `category/my-skill/SKILL.m
 | FR-52 | Symlink 状态 | 列表展示 `~/.agents/skills/<name>` 是否指向主库对应目录 |
 | FR-53 | 清单导出 | 重新生成 `skills-inventory.md` 或导出 JSON |
 
+### 4.6.1 多 Agent 平台（v0.3，详见 [02-多Agent架构方案](./02-多Agent工具统一架构方案.md)）
+
+| 编号 | 需求 | 说明 |
+|------|------|------|
+| FR-80 | 平台注册表 | 内置 Cursor、Open Agent Skills、OpenCode、Claude、Codex 等路径模板，可启用/禁用 |
+| FR-81 | Binding 健康检查 | 列表展示各平台 symlink/副本是否正确指向主库 skill |
+| FR-82 | 发布到平台 | 从 canonical 主库 publish 到 `~/.agents/skills`、`~/.config/opencode/skills` 等 |
+| FR-83 | 批量同步 | 顶栏一键按所选平台 publish 全部/选中 skill |
+| FR-84 | CLI 探测 | 设置页展示 cursor/opencode 等 CLI 是否已安装 |
+| FR-85 | 平台筛选 | 按「已发布平台」「binding 异常」筛选 skill 列表 |
+
 ### 4.7 Git 工作流
 
 | 编号 | 需求 | 说明 |

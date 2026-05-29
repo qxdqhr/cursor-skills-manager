@@ -48,6 +48,7 @@
     "gitDirtyOnly": "Uncommitted",
     "invalidOnly": "Invalid",
     "scriptsOnly": "Has scripts",
+    "bindingIssueOnly": "Binding issue",
     "agentsIssueOnly": "Agents issue",
     "searchChip": "Search: {{q}}",
     "categoryChip": "Category: {{path}}"
@@ -65,6 +66,8 @@
     "scripts": "scripts",
     "uncommitted": "Uncommitted",
     "agentsUnlinked": "agents unlinked",
+    "bindingIssue": "{{platform}} issue",
+    "bindingsTitle": "Platform bindings",
     "openEditor": "Open editor",
     "openFolder": "Open folder",
     "openInEditor": "Open in editor",
@@ -93,7 +96,27 @@
     "savePrefs": "Save preferences",
     "prefsSaved": "Preferences saved",
     "firstUseToken": "Configure your API token to get started",
-    "openSettings": "Open settings"
+    "openSettings": "Open settings",
+    "platforms": "Agent platforms",
+    "platformsHint": "When enabled, skills list checks symlink bindings under each platform root (read-only in M7).",
+    "platformEnabled": "Enabled",
+    "platformRoot": "Global root"
+  },
+  "platforms": {
+    "cursor": "Cursor (canonical)",
+    "agents": "Open Agent Skills",
+    "opencode": "OpenCode",
+    "claude": "Claude Code",
+    "codex": "Codex"
+  },
+  "binding": {
+    "ok": "{{platform}} linked",
+    "unknown": "Unknown binding state",
+    "issue": {
+      "missing": "Missing symlink",
+      "wrong_target": "Symlink target mismatch",
+      "not_symlink": "Path exists but is not a symlink"
+    }
   },
   "api": {
     "connecting": "Connecting to API…",

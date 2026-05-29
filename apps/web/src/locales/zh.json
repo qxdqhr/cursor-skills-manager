@@ -48,6 +48,7 @@
     "gitDirtyOnly": "未提交",
     "invalidOnly": "校验失败",
     "scriptsOnly": "含 scripts",
+    "bindingIssueOnly": "平台绑定异常",
     "agentsIssueOnly": "agents 异常",
     "searchChip": "搜索：{{q}}",
     "categoryChip": "分类：{{path}}"
@@ -65,6 +66,8 @@
     "scripts": "scripts",
     "uncommitted": "未提交",
     "agentsUnlinked": "agents 未链接",
+    "bindingIssue": "{{platform}} 异常",
+    "bindingsTitle": "平台绑定",
     "openEditor": "打开编辑器",
     "openFolder": "打开目录",
     "openInEditor": "用编辑器打开",
@@ -93,7 +96,27 @@
     "savePrefs": "保存偏好",
     "prefsSaved": "偏好已保存",
     "firstUseToken": "首次使用请配置 API Token",
-    "openSettings": "打开设置"
+    "openSettings": "打开设置",
+    "platforms": "Agent 平台",
+    "platformsHint": "启用后会在 skill 列表检查对应目录下的 symlink 绑定（M7 只读，发布见后续版本）。",
+    "platformEnabled": "启用",
+    "platformRoot": "全局目录"
+  },
+  "platforms": {
+    "cursor": "Cursor（主库）",
+    "agents": "Open Agent Skills",
+    "opencode": "OpenCode",
+    "claude": "Claude Code",
+    "codex": "Codex"
+  },
+  "binding": {
+    "ok": "{{platform}} 已绑定",
+    "unknown": "绑定状态未知",
+    "issue": {
+      "missing": "缺少 symlink",
+      "wrong_target": "symlink 目标不正确",
+      "not_symlink": "存在同名路径但不是 symlink"
+    }
   },
   "api": {
     "connecting": "连接 API…",
